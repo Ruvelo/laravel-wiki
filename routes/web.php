@@ -21,7 +21,7 @@ Route::group([
     Route::get('/_/recent', [HistoryController::class, 'recent'])->name('recent');
     Route::get('/_/search', SearchController::class)->name('search');
 
-    Route::middleware([...config('wiki.edit_middleware', ['auth']), AuthorizeEditing::class])->group(function () {
+    Route::middleware([...config('wiki.edit_middleware', []), AuthorizeEditing::class])->group(function () {
         Route::get('/_/new', [PageController::class, 'create'])->name('create');
         Route::post('/_/new', [PageController::class, 'store'])->name('store');
         Route::post('/_/preview', [PageController::class, 'preview'])->name('preview');

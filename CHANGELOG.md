@@ -6,9 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-08
+
 ### Added
 
 - Docs-style layout: a left-hand menu, the page, and an "On this page" outline on the right. The menu is an editable page (`wiki.sidebar`, "Sidebar" by default), with an alphabetical list as the fallback.
+
+### Fixed
+
+- Guests opening an edit URL in an app without a `login` route (a fresh install, before a starter kit) got a 500. They now get a 403, or are sent to the login page when the app has one. `edit_middleware` now defaults to `[]`, since the wiki checks sign-in itself.
 
 ### Changed
 
@@ -34,5 +40,6 @@ First release.
 - Configurable CommonMark extensions and options.
 - Ruvelo house style UI: light and dark, no build step, themable through CSS variables.
 
-[Unreleased]: https://github.com/Ruvelo/laravel-wiki/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Ruvelo/laravel-wiki/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Ruvelo/laravel-wiki/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Ruvelo/laravel-wiki/releases/tag/v1.0.0

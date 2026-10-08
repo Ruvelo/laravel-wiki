@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ruvelo\Wiki\Tests\Feature;
 
+use Illuminate\Support\Facades\Gate;
 use Ruvelo\Wiki\Tests\TestCase;
 use Ruvelo\Wiki\Wiki;
 
@@ -51,7 +52,10 @@ class JsonApiTest extends TestCase
 
     public function test_writes_need_an_editor(): void
     {
-        $this->postJson('/api/wiki/pages', ['title' => 'Ops'])->assertForbidden();
+        $this->postJson('/api/wiki/pages', ['title' => 'Ops'])->assertUnauthorized();
+
+        Gate::define('wiki-edit', fn ($user) => false);
+        $this->actingAs($this->user())->postJson('/api/wiki/pages', ['title' => 'Ops'])->assertForbidden();
     }
 
     public function test_create_a_page(): void

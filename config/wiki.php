@@ -22,7 +22,9 @@ return [
     |
     | The wiki is served under `path` (e.g. /wiki). `middleware` wraps every
     | route; `edit_middleware` is added on top for creating, editing, deleting
-    | and restoring. Set `routes` to false to register your own.
+    | and restoring. Editing always requires a signed-in user who passes the
+    | `wiki-edit` gate; guests go to your `login` route if you have one.
+    | Set `routes` to false to register your own.
     |
     */
 
@@ -34,7 +36,7 @@ return [
 
     'middleware' => ['web'],
 
-    'edit_middleware' => ['auth'],
+    'edit_middleware' => [],
 
     /*
     |--------------------------------------------------------------------------

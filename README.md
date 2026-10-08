@@ -104,7 +104,7 @@ php artisan vendor:publish --tag=wiki-config
 | `path` | `wiki` (`WIKI_PATH`) | URL prefix |
 | `domain` | `null` | Serve the wiki on its own (sub)domain |
 | `middleware` | `['web']` | Applied to every route |
-| `edit_middleware` | `['auth']` | Added for create/edit/delete/restore |
+| `edit_middleware` | `[]` | Extra middleware for create/edit/delete/restore (signing in is always required) |
 | `home` | `home` | Slug shown at the wiki root |
 | `sidebar` | `sidebar` | Slug of the page used as the left menu; `null` for an automatic list |
 | `table_prefix` | `wiki_` | Tables are `{prefix}pages`, `{prefix}revisions`, `{prefix}links` |

@@ -6,14 +6,33 @@ namespace Ruvelo\Wiki\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Ruvelo\Wiki\Wiki;
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Guards every route that changes the wiki.
+ *
+ * Guests are sent to the app's login page when it has one. A fresh app has
+ * no `login` route until a starter kit is installed, and Laravel's own
+ * `auth` middleware fails with a 500 there; this answers 401/403 instead.
+ */
 class AuthorizeEditing
 {
-    public function handle(Request $request, Closure $next): mixed
+    public function handle(Request $request, Closure $next): Response
     {
-        abort_unless(Wiki::canEdit($request->user()), 403);
+        if (Wiki::canEdit($request->user())) {
+            return $next($request);
+        }
 
-        return $next($request);
+        if ($request->user() === null) {
+            abort_if($request->expectsJson(), 401);
+
+            if (Route::has('login')) {
+                return redirect()->guest(route('login'));
+            }
+        }
+
+        abort(403);
     }
 }

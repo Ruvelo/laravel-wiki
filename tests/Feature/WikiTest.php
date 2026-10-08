@@ -6,6 +6,7 @@ namespace Ruvelo\Wiki\Tests\Feature;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use Ruvelo\Wiki\Events\PageSaved;
 use Ruvelo\Wiki\Models\Page;
@@ -81,6 +82,19 @@ class WikiTest extends TestCase
         $this->postJson('/wiki/_/new', ['title' => 'x'])->assertUnauthorized();
         $this->putJson("/wiki/{$page->slug}", ['title' => 'x'])->assertUnauthorized();
         $this->deleteJson("/wiki/{$page->slug}")->assertUnauthorized();
+    }
+
+    public function test_guests_get_a_403_when_the_app_has_no_login_page(): void
+    {
+        $this->get('/wiki/_/new')->assertForbidden();
+    }
+
+    public function test_guests_are_sent_to_the_login_page_when_there_is_one(): void
+    {
+        Route::get('/login', fn () => 'Sign in')->name('login');
+        app('router')->getRoutes()->refreshNameLookups();
+
+        $this->get('/wiki/_/new')->assertRedirect('/login');
     }
 
     public function test_a_gate_can_restrict_editing(): void
