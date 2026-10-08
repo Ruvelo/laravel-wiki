@@ -31,7 +31,7 @@ class HistoryController extends Controller
             'page' => $page,
             'revision' => $revision,
             'previous' => $previous,
-            'diff' => $diff,
+            'diff' => Diff::collapse($diff),
             'stats' => Diff::stats($diff),
             'isCurrent' => $revision->id === $page->revisions()->value('id'),
         ]);

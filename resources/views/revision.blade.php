@@ -39,7 +39,11 @@
     @else
         <div class="wiki-diff" role="table" aria-label="Line changes">
             @foreach ($diff as [$op, $line])
-                <div class="{{ ['+' => 'add', '-' => 'del', ' ' => 'eq'][$op] }}">{{ $op }} {{ $line }}</div>
+                @if ($op === '…')
+                    <div class="skip">⋯ {{ $line }} unchanged {{ \Illuminate\Support\Str::plural('line', $line) }}</div>
+                @else
+                    <div class="{{ ['+' => 'add', '-' => 'del', ' ' => 'eq'][$op] }}">{{ $op }} {{ $line }}</div>
+                @endif
             @endforeach
         </div>
     @endif

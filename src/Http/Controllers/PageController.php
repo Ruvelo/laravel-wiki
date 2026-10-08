@@ -52,7 +52,7 @@ class PageController extends Controller
             'title' => (string) $request->query('title', ''),
             'body' => '',
             'base' => null,
-            'preview' => null,
+            'preview' => '',
         ]);
     }
 
@@ -61,7 +61,7 @@ class PageController extends Controller
         $data = $this->validated($request);
 
         if ($request->input('action') === 'preview') {
-            return $this->preview(null, $data, $renderer);
+            return $this->previewForm(null, $data, $renderer);
         }
 
         $slug = Page::slugFor($data['title']);
@@ -87,8 +87,18 @@ class PageController extends Controller
             'title' => $page->title,
             'body' => $page->body,
             'base' => $page->revisions()->value('id'),
-            'preview' => null,
+            'preview' => $page->html(),
         ]);
+    }
+
+    /**
+     * The editor's live preview: Markdown in, HTML fragment out.
+     */
+    public function preview(Request $request, Renderer $renderer): Response
+    {
+        $data = $request->validate(['body' => ['nullable', 'string']]);
+
+        return response($renderer->render($data['body'] ?? ''))->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     public function update(Request $request, Page $page, Renderer $renderer): Response|RedirectResponse
@@ -96,7 +106,7 @@ class PageController extends Controller
         $data = $this->validated($request);
 
         if ($request->input('action') === 'preview') {
-            return $this->preview($page, $data, $renderer);
+            return $this->previewForm($page, $data, $renderer);
         }
 
         // Someone saved since this editor opened the page: don't silently
@@ -140,7 +150,7 @@ class PageController extends Controller
         return $data;
     }
 
-    private function preview(?Page $page, array $data, Renderer $renderer): Response
+    private function previewForm(?Page $page, array $data, Renderer $renderer): Response
     {
         return response()->view('wiki::edit', [
             'page' => $page,

@@ -80,6 +80,26 @@ class Page extends Model
         );
     }
 
+    /**
+     * The body without Markdown syntax, for search snippets and previews.
+     */
+    public function plainText(): string
+    {
+        $text = preg_replace([
+            '/\[\[[^\]|]*\|([^\]]*)\]\]/u',   // [[Target|label]] -> label
+            '/\[\[([^\]]*)\]\]/u',              // [[Target]] -> Target
+            '/!?\[([^\]]*)\]\([^)]*\)/u',       // [text](url) -> text
+            '/^\s{0,3}(#{1,6}|>|[-*+]\s+\[[ xX]\]|[-*+]|\d+\.)\s+/mu',
+            '/^\s*(\|?\s*:?-{3,}:?\s*)+\|?\s*$/mu', // table rules
+            '/^(`{3,}|~{3,}).*$/mu',
+            '/\[TOC\]/u',
+            '/\*{1,3}|`+/u',
+            '/\|/u',
+        ], ['$1', '$1', '$1', '', '', '', '', '', ' '], $this->body);
+
+        return trim(preg_replace('/\s+/u', ' ', $text));
+    }
+
     public function html(): string
     {
         return app(Renderer::class)->render($this->body);

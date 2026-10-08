@@ -21,7 +21,16 @@ class RenderingTest extends TestCase
         $html = $this->render('See [[Deploy guide]] and [[On-call rota|the rota]].');
 
         $this->assertStringContainsString('<a class="wiki-link" href="'.route('wiki.show', 'deploy-guide').'">Deploy guide</a>', $html);
-        $this->assertStringContainsString('<a class="wiki-link wiki-link--new" href="'.route('wiki.create', ['title' => 'On-call rota']).'">the rota</a>', $html);
+        $this->assertStringContainsString('<a class="wiki-link wiki-link--new" href="'.route('wiki.show', 'on-call-rota').'">the rota</a>', $html);
+    }
+
+    public function test_red_links_open_the_create_form_for_editors(): void
+    {
+        $this->actingAs($this->user());
+
+        $html = $this->render('[[On-call rota]]');
+
+        $this->assertStringContainsString('href="'.route('wiki.create', ['title' => 'On-call rota']).'"', $html);
     }
 
     public function test_wiki_links_inside_code_are_left_alone(): void

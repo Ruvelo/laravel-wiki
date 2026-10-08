@@ -33,6 +33,20 @@ class DiffTest extends TestCase
         $this->assertSame(['added' => 0, 'removed' => 0], Diff::stats(Diff::lines("a\nb", "a\nb")));
     }
 
+    public function test_long_unchanged_stretches_collapse_to_a_marker(): void
+    {
+        $old = implode("\n", range(1, 20));
+        $new = str_replace("\n10\n", "\nten\n", $old);
+
+        $this->assertSame([
+            ['…', 6],
+            [' ', '7'], [' ', '8'], [' ', '9'],
+            ['-', '10'], ['+', 'ten'],
+            [' ', '11'], [' ', '12'], [' ', '13'],
+            ['…', 7],
+        ], Diff::collapse(Diff::lines($old, $new)));
+    }
+
     public function test_huge_rewrites_fall_back_to_a_block_replacement(): void
     {
         $old = implode("\n", range(1, 1500));

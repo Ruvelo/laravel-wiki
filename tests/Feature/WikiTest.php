@@ -131,9 +131,30 @@ class WikiTest extends TestCase
         $this->actingAs($this->user())
             ->post('/wiki/_/new', ['title' => 'Draft', 'body' => '# Hello', 'action' => 'preview'])
             ->assertOk()
-            ->assertSee('Preview, not saved yet');
+            ->assertSee('id="content-hello"', false);
 
         $this->assertFalse(Page::where('slug', 'draft')->exists());
+    }
+
+    public function test_the_live_preview_renders_markdown_for_editors_only(): void
+    {
+        $this->postJson('/wiki/_/preview', ['body' => '**hi**'])->assertUnauthorized();
+
+        $this->actingAs($this->user())
+            ->post('/wiki/_/preview', ['body' => "**hi** [[Nowhere]]\n\n<script>x</script>"])
+            ->assertOk()
+            ->assertSee('<strong>hi</strong>', false)
+            ->assertSee('wiki-link--new', false)
+            ->assertDontSee('<script>', false);
+    }
+
+    public function test_search_snippets_are_plain_text(): void
+    {
+        $this->page('Deploy guide', "## Steps\n\n- Ask [[Ops|the ops team]] before you **deploy**.");
+
+        $this->get('/wiki/_/search?q=deploy&all=1')
+            ->assertSee('Steps Ask the ops team before you <mark>deploy</mark>.', false)
+            ->assertDontSee('[[Ops');
     }
 
     public function test_history_diff_and_restore(): void

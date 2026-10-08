@@ -88,6 +88,43 @@ final class Diff
     }
 
     /**
+     * Keeps `$context` unchanged lines around each change and replaces longer
+     * unchanged stretches with a ['…', count] marker.
+     *
+     * @param  list<array{0: string, 1: string}>  $ops
+     * @return list<array{0: string, 1: string|int}>
+     */
+    public static function collapse(array $ops, int $context = 3): array
+    {
+        $changed = array_keys(array_filter($ops, fn (array $op) => $op[0] !== ' '));
+        $keep = [];
+        foreach ($changed as $i) {
+            for ($j = max(0, $i - $context); $j <= min(count($ops) - 1, $i + $context); $j++) {
+                $keep[$j] = true;
+            }
+        }
+
+        $out = [];
+        $skipped = 0;
+        foreach ($ops as $i => $op) {
+            if (isset($keep[$i])) {
+                if ($skipped > 0) {
+                    $out[] = ['…', $skipped];
+                    $skipped = 0;
+                }
+                $out[] = $op;
+            } else {
+                $skipped++;
+            }
+        }
+        if ($skipped > 0 && $out !== []) {
+            $out[] = ['…', $skipped];
+        }
+
+        return $out;
+    }
+
+    /**
      * @return array{added: int, removed: int}
      */
     public static function stats(array $ops): array

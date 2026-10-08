@@ -5,6 +5,7 @@ namespace Ruvelo\Wiki\Markdown;
 use Closure;
 use Ruvelo\Wiki\Models\Page;
 use Ruvelo\Wiki\Support\WikiLinks;
+use Ruvelo\Wiki\Wiki;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Link;
 use League\CommonMark\Parser\Inline\InlineParserInterface;
 use League\CommonMark\Parser\Inline\InlineParserMatch;
@@ -12,7 +13,8 @@ use League\CommonMark\Parser\InlineParserContext;
 
 /**
  * Turns [[Target]] and [[Target|label]] into links. Links to pages that don't
- * exist yet get the `wiki-link--new` class and point at the create form.
+ * exist yet get the `wiki-link--new` class; they open the create form for
+ * people who can edit, and the "no page here yet" page for everyone else.
  */
 final class WikiLinkParser implements InlineParserInterface
 {
@@ -40,7 +42,7 @@ final class WikiLinkParser implements InlineParserInterface
         $inlineContext->getCursor()->advanceBy($inlineContext->getFullMatchLength());
 
         $exists = ($this->exists)($slug);
-        $url = $exists
+        $url = $exists || ! Wiki::canEdit()
             ? route('wiki.show', $slug)
             : route('wiki.create', ['title' => $target]);
 

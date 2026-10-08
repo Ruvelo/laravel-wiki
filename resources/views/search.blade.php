@@ -21,8 +21,8 @@
                 <li>
                     <a href="{{ route('wiki.show', $page) }}">{{ $page->title }}</a>
                     <small>edited {{ $page->updated_at->diffForHumans() }}</small>
-                    @if ($snippet = \Illuminate\Support\Str::excerpt($page->body, $query, ['radius' => 90]))
-                        <span class="wiki-snippet">{{ $snippet }}</span>
+                    @if ($snippet = \Illuminate\Support\Str::excerpt($page->plainText(), $query, ['radius' => 90]))
+                        <span class="wiki-snippet">{!! preg_replace('/'.preg_quote(e($query), '/').'/iu', '<mark>$0</mark>', e($snippet)) !!}</span>
                     @endif
                 </li>
             @endforeach

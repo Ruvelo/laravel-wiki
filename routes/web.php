@@ -22,6 +22,7 @@ Route::group([
     Route::middleware([...config('wiki.edit_middleware', ['auth']), AuthorizeEditing::class])->group(function () {
         Route::get('/_/new', [PageController::class, 'create'])->name('create');
         Route::post('/_/new', [PageController::class, 'store'])->name('store');
+        Route::post('/_/preview', [PageController::class, 'preview'])->name('preview');
         Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
         Route::put('/{page}', [PageController::class, 'update'])->name('update');
         Route::delete('/{page}', [PageController::class, 'destroy'])->name('destroy');
