@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docs · Laravel Wiki</title>
+    <meta name="description" content="Install, configure and customise Laravel Wiki, the drop-in wiki for Laravel apps.">
+    <meta property="og:image" content="https://ruvelo.github.io/laravel-wiki/art/banner.png">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251d1'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'%3E%5B%5B%5D%5D%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+    <header class="wrap top">
+        <a class="mark" href="./">Laravel Wiki</a>
+        <nav aria-label="Main">
+            <a href="demo/">Demo</a>
+            <a href="docs.html" aria-current="page">Docs</a>
+            <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a>
+        </nav>
+    </header>
+
+    <div class="wrap docs">
+        <nav aria-label="On this page">
+            <ol>
+                <li><a href="#install">Install</a></li>
+                <li><a href="#editing">Who can edit</a></li>
+                <li><a href="#writing">Writing pages</a></li>
+                <li><a href="#history">History</a></li>
+                <li><a href="#config">Configuration</a></li>
+                <li><a href="#look">Changing the look</a></li>
+                <li><a href="#code">From your code</a></li>
+                <li><a href="#urls">URLs</a></li>
+                <li><a href="#faq">Questions</a></li>
+            </ol>
+        </nav>
+
+        <main class="doc">
+            <h1>Docs</h1>
+            <p class="lede">Laravel Wiki adds a team wiki to an existing Laravel app. Everything here also works in the <a href="demo/">live demo</a>, except editing.</p>
+
+            <h2 id="install">Install</h2>
+            <p>You need Laravel 12 or 13 and PHP 8.3 or newer. Any database Laravel supports will do.</p>
+<pre class="code">composer require ruvelo/laravel-wiki
+php artisan migrate</pre>
+            <p>Open <code>/wiki</code> in your app and sign in to write the first page. The migration adds three tables: <code>wiki_pages</code>, <code>wiki_revisions</code> and <code>wiki_links</code>.</p>
+
+            <h2 id="editing">Who can edit</h2>
+            <p>By default anyone can read the wiki, and anyone signed in can create, edit, delete and restore pages. To choose who can edit, define a <code>wiki-edit</code> gate, for example in your <code>AppServiceProvider</code>:</p>
+<pre class="code">use Illuminate\Support\Facades\Gate;
+
+Gate::define('wiki-edit', fn ($user) => $user->is_admin);</pre>
+            <p>To keep the whole wiki behind a login, add <code>auth</code> to the middleware every wiki route uses:</p>
+<pre class="code">// config/wiki.php
+'middleware' => ['web', 'auth'],</pre>
+            <p class="note">Editing always requires a signed-in user who passes the gate. The edit buttons only appear for people who can use them.</p>
+
+            <h2 id="writing">Writing pages</h2>
+            <p>Pages are written in Markdown, GitHub-style: headings, <strong>bold</strong> and <em>italic</em>, lists, task lists, tables, fenced code blocks and links.</p>
+            <h3>Linking pages</h3>
+            <p>Put a page title in double brackets to link to it. Add a label after a pipe to change the link text:</p>
+<pre class="code">Read the [[Deploy guide]] first.
+Ask [[On-call rota|whoever is on call]].</pre>
+            <p>Links to pages that don't exist yet show in red. For editors they open the new-page form with the title filled in; other readers see a "no page here yet" page.</p>
+            <p>Each page lists the pages that link to it under <em>What links here</em>.</p>
+            <h3>Table of contents</h3>
+            <p>Put <code>[TOC]</code> on a line of its own and it becomes a table of contents built from the page's headings.</p>
+            <h3>Safety</h3>
+            <p>Raw HTML in a page is shown as text, not run, and <code>javascript:</code> links are removed. Someone with edit access can't make the page run scripts in a reader's browser.</p>
+
+            <h2 id="history">History</h2>
+            <p>Every save creates a revision. A page's <em>History</em> lists them with author, time and summary. Open one to see what changed, line by line, and put that version back with <em>Restore this version</em>. Restoring is a save like any other, so it can be undone too.</p>
+            <p>If someone saves a page while you're editing it, your save is refused rather than overwriting their work. Your text stays in the editor so you can merge it by hand.</p>
+
+            <h2 id="config">Configuration</h2>
+            <p>The defaults suit most apps. To change them, publish the config file:</p>
+<pre class="code">php artisan vendor:publish --tag=wiki-config</pre>
+            <table>
+                <thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead>
+                <tbody>
+                    <tr><td><code>name</code></td><td><code>Wiki</code></td><td>Shown in the header and the browser tab. Also <code>WIKI_NAME</code>.</td></tr>
+                    <tr><td><code>path</code></td><td><code>wiki</code></td><td>Where the wiki lives in your app. Also <code>WIKI_PATH</code>.</td></tr>
+                    <tr><td><code>domain</code></td><td><code>null</code></td><td>Serve the wiki on its own domain, such as <code>docs.example.com</code>.</td></tr>
+                    <tr><td><code>middleware</code></td><td><code>['web']</code></td><td>Applied to every wiki route.</td></tr>
+                    <tr><td><code>edit_middleware</code></td><td><code>['auth']</code></td><td>Added for creating, editing, deleting and restoring.</td></tr>
+                    <tr><td><code>home</code></td><td><code>home</code></td><td>The page shown at the wiki's root.</td></tr>
+                    <tr><td><code>table_prefix</code></td><td><code>wiki_</code></td><td>Prefix for the three tables.</td></tr>
+                    <tr><td><code>run_migrations</code></td><td><code>true</code></td><td>Set to <code>false</code> if you publish the migration and run it yourself.</td></tr>
+                    <tr><td><code>user_model</code></td><td>your users model</td><td>Who revisions are credited to.</td></tr>
+                    <tr><td><code>user_name_attribute</code></td><td><code>name</code></td><td>The author name shown in the history.</td></tr>
+                    <tr><td><code>per_page</code></td><td><code>50</code></td><td>Items per page in lists and search.</td></tr>
+                    <tr><td><code>routes</code></td><td><code>true</code></td><td>Set to <code>false</code> to register the routes yourself.</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="look">Changing the look</h2>
+            <p>The wiki ships with its own layout so it looks finished out of the box. To change it, publish the views:</p>
+<pre class="code">php artisan vendor:publish --tag=wiki-views</pre>
+            <p>They land in <code>resources/views/vendor/wiki</code>. Every page extends <code>layout.blade.php</code>, so replacing that one file puts the wiki inside your app's own layout. Pages fill a <code>title</code> and a <code>content</code> section, and there's a <code>wiki-head</code> stack for extra tags in <code>&lt;head&gt;</code>.</p>
+            <p>To keep the layout and only change colours, override the CSS variables at the top of it, such as <code>--wiki-accent</code> for links and buttons and <code>--wiki-new</code> for links to missing pages.</p>
+
+            <h2 id="code">From your code</h2>
+            <p>Pages are Eloquent models. Use <code>commit()</code> to save, so the change is recorded as a revision and links are re-indexed:</p>
+<pre class="code">use Ruvelo\Wiki\Models\Page;
+
+$page = Page::firstOrNew(['slug' => Page::slugFor('Release notes')]);
+$page->commit('Release notes', "## 2.0\n\nSee the [[Upgrade guide]].", 'Imported from GitHub', $user);
+
+$page->html();               // the rendered page
+$page->revisions;            // newest first
+$page->backlinks()->get();   // pages that link here</pre>
+            <h3>Events</h3>
+            <p><code>Ruvelo\Wiki\Events\PageSaved</code> fires after every create, edit and restore, with the <code>$page</code> and the new <code>$revision</code>. Listen for it to post to Slack, update a search index or clear a cache.</p>
+
+            <h2 id="urls">URLs</h2>
+            <table>
+                <thead><tr><th>Address</th><th>Shows</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/wiki</code></td><td>The home page</td></tr>
+                    <tr><td><code>/wiki/{page}</code></td><td>A page</td></tr>
+                    <tr><td><code>/wiki/{page}/edit</code></td><td>The editor</td></tr>
+                    <tr><td><code>/wiki/{page}/history</code></td><td>A page's revisions</td></tr>
+                    <tr><td><code>/wiki/{page}/history/{id}</code></td><td>One revision and what it changed</td></tr>
+                    <tr><td><code>/wiki/_/new</code></td><td>New page; add <code>?title=</code> to fill in the title</td></tr>
+                    <tr><td><code>/wiki/_/pages</code></td><td>All pages</td></tr>
+                    <tr><td><code>/wiki/_/recent</code></td><td>Recent changes across the wiki</td></tr>
+                    <tr><td><code>/wiki/_/search?q=</code></td><td>Search</td></tr>
+                </tbody>
+            </table>
+            <p>Page addresses never contain an underscore, so the <code>/_/</code> pages can't clash with a page's address.</p>
+
+            <h2 id="faq">Questions</h2>
+            <h3>What happens to links when I rename a page?</h3>
+            <p>Nothing breaks. A page keeps the address it was created with, and existing <code>[[Old title]]</code> links keep pointing at it.</p>
+            <h3>Can I search across a big wiki?</h3>
+            <p>Search uses your database's <code>LIKE</code>, which is fine for thousands of pages. For more, listen for <code>PageSaved</code> and feed a search engine such as Meilisearch.</p>
+            <h3>Is it free?</h3>
+            <p>Yes. MIT licensed: use it in any project, commercial or not. Issues and pull requests are welcome on <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a>.</p>
+        </main>
+    </div>
+
+    <footer class="wrap footer">
+        <p>Built by <a href="https://github.com/francoisbultez">François Bultez</a> at <a href="https://github.com/Ruvelo">Ruvelo</a>. Free and open source under the MIT license.</p>
+        <p><a href="./">Home</a> &nbsp; <a href="demo/">Demo</a> &nbsp; <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a></p>
+    </footer>
+
+    <script src="assets/site.js"></script>
+</body>
+</html>

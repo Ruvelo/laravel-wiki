@@ -5,3 +5,4 @@
 /workbench/
 .DS_Store
 /testbench.yaml
+/build/

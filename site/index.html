@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Laravel Wiki · a drop-in wiki for your Laravel app</title>
+    <meta name="description" content="Markdown pages, [[links]] between them, and the full history of every change. One composer require, no build step. Free and open source, by Ruvelo.">
+    <meta property="og:title" content="Laravel Wiki">
+    <meta property="og:description" content="A drop-in wiki for your Laravel app. One composer require, no build step.">
+    <meta property="og:image" content="https://ruvelo.github.io/laravel-wiki/art/banner.png">
+    <meta property="og:url" content="https://ruvelo.github.io/laravel-wiki/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251d1'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'%3E%5B%5B%5D%5D%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+    <header class="wrap top">
+        <a class="mark" href="./">Laravel Wiki</a>
+        <nav aria-label="Main">
+            <a href="demo/">Demo</a>
+            <a href="docs.html">Docs</a>
+            <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="wrap hero">
+            <h1>The wiki that lives inside your Laravel app.</h1>
+            <p class="lede">Markdown pages, links between them, and the full history of every change. It runs on your database and your logins, with no build step and no extra services.</p>
+
+            <div class="actions">
+                <span class="install"><code>composer require ruvelo/laravel-wiki</code><button class="copy" type="button" data-copy="composer require ruvelo/laravel-wiki">Copy</button></span>
+                <a class="button" href="demo/">Open the live demo</a>
+                <a class="button button--quiet" href="docs.html">Read the docs</a>
+            </div>
+
+            <div class="playground">
+                <div class="pane">
+                    <label class="pane-label" for="source"><span>Markdown</span><span>Type <code>[[</code> to link a page</span></label>
+                    <textarea class="source" id="source" spellcheck="false" data-source># Deploy guide
+
+Every merge to `main` ships to production.
+Before you merge, check the [[Service map]]
+and tell whoever is on the [[On-call rota]].
+
+## Checklist
+
+- [x] Tests pass
+- [ ] Release notes in [[Changelog|the changelog]]
+- [ ] **Watch** the error rate for ten minutes</textarea>
+                </div>
+                <div class="pane">
+                    <div class="pane-label">
+                        <span>Page</span>
+                        <span class="legend"><span class="exists">Page exists</span><span class="missing">Not written yet</span></span>
+                    </div>
+                    <div class="rendered" data-rendered aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="wrap section" id="tour">
+            <h2>Everything a team wiki needs, nothing it doesn't.</h2>
+            <p class="intro">These are screenshots of the <a href="demo/">live demo</a>, a handbook for a made-up product team. Click around it: it's the package's real output.</p>
+
+            <div class="shots">
+                <figure class="wide">
+                    <img src="art/screenshot-page.png" width="1280" height="800" alt="A wiki page titled Home, with a table of contents, blue links to existing pages and a red link to a page that hasn't been written yet.">
+                    <figcaption><strong>Pages link to each other.</strong> Write <code>[[Deploy guide]]</code> and it becomes a link. Pages that don't exist yet show in red, an open invitation to whoever knows the answer.</figcaption>
+                </figure>
+                <figure>
+                    <img src="art/screenshot-editor.png" width="1440" height="900" alt="The editor: Markdown on the left, the rendered page on the right.">
+                    <figcaption><strong>Edit with a live preview.</strong> Markdown on the left, the finished page on the right, updated as you type.</figcaption>
+                </figure>
+                <figure>
+                    <img src="art/screenshot-diff.png" width="1280" height="800" alt="A revision of the Deploy guide, with added lines in green and removed lines in red.">
+                    <figcaption><strong>Every save is kept.</strong> See exactly what changed, who changed it, and put any old version back in one click.</figcaption>
+                </figure>
+                <figure>
+                    <img src="art/screenshot-dark.png" width="1280" height="800" alt="The Deploy guide page in dark mode.">
+                    <figcaption><strong>Light and dark.</strong> Follows each reader's system setting.</figcaption>
+                </figure>
+                <figure>
+                    <img src="art/screenshot-search.png" width="1280" height="800" alt="Search results for deploy, with the matching word highlighted in each snippet.">
+                    <figcaption><strong>Search that gets out of the way.</strong> Type a page's exact title and you land on it; otherwise you get ranked results with the match highlighted.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="wrap section" id="features">
+            <h2>What's in the box</h2>
+            <dl class="features">
+                <div><dt>What links here</dt><dd>Every page lists the pages that point to it, so nothing ends up orphaned.</dd></div>
+                <div><dt>Edits never collide</dt><dd>If someone saves while you're still typing, your save is held back instead of wiping out theirs, and your text stays in the editor.</dd></div>
+                <div><dt>Markdown you already know</dt><dd>GitHub-style tables, task lists and code blocks. Put <code>[TOC]</code> on its own line for a table of contents.</dd></div>
+                <div><dt>Safe with any editor</dt><dd>Raw HTML is escaped and <code>javascript:</code> links are dropped, so a page can never run scripts in a reader's browser.</dd></div>
+                <div><dt>Your logins, your rules</dt><dd>Anyone signed in can edit by default. One gate narrows it to admins, a team, or whoever you like.</dd></div>
+                <div><dt>Titles in any language</dt><dd><code>Café crème</code> lives at <code>/wiki/café-crème</code>, <code>日本語</code> at <code>/wiki/日本語</code>. Renaming a page never breaks its address.</dd></div>
+                <div><dt>Looks like your app</dt><dd>Plain Blade views, styled with CSS variables. Publish them and swap in your own layout.</dd></div>
+                <div><dt>Scriptable</dt><dd>Create pages from code, read the history, and listen for a <code>PageSaved</code> event to notify, index or cache.</dd></div>
+            </dl>
+        </section>
+
+        <section class="wrap section" id="install">
+            <h2>Running in under a minute</h2>
+            <p class="intro">Laravel 12 or 13 on PHP 8.3 or newer, with any database Laravel supports.</p>
+            <ol class="steps">
+                <li>
+                    <strong>Install the package</strong>
+                    <div><pre class="code">composer require ruvelo/laravel-wiki</pre></div>
+                </li>
+                <li>
+                    <strong>Create its tables</strong>
+                    <div><pre class="code">php artisan migrate</pre></div>
+                </li>
+                <li>
+                    <strong>Open <code>/wiki</code></strong>
+                    <p>Sign in and write the first page. That's it.</p>
+                </li>
+                <li>
+                    <strong>Decide who can edit (optional)</strong>
+                    <div><pre class="code">Gate::define('wiki-edit', fn ($user) => $user->is_admin);</pre></div>
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer class="wrap footer">
+        <p>Built by <a href="https://github.com/francoisbultez">François Bultez</a> at <a href="https://github.com/Ruvelo">Ruvelo</a>. Free and open source under the MIT license.</p>
+        <p><a href="docs.html">Docs</a> &nbsp; <a href="demo/">Demo</a> &nbsp; <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a></p>
+    </footer>
+
+    <script src="assets/site.js"></script>
+</body>
+</html>

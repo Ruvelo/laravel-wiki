@@ -1,27 +1,65 @@
+<p align="center">
+  <a href="https://ruvelo.github.io/laravel-wiki/"><img src="art/banner.png" alt="Laravel Wiki: the wiki that lives inside your Laravel app" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://ruvelo.github.io/laravel-wiki/demo/"><strong>Live demo</strong></a> &nbsp;&nbsp;&nbsp;
+  <a href="https://ruvelo.github.io/laravel-wiki/docs.html"><strong>Docs</strong></a> &nbsp;&nbsp;&nbsp;
+  <a href="https://ruvelo.github.io/laravel-wiki/"><strong>Website</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Ruvelo/laravel-wiki/actions/workflows/tests.yml"><img src="https://github.com/Ruvelo/laravel-wiki/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <img src="https://img.shields.io/badge/Laravel-12%20%7C%2013-2251d1" alt="Laravel 12 | 13">
+  <img src="https://img.shields.io/badge/PHP-8.3%2B-2251d1" alt="PHP 8.3+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2251d1" alt="MIT license"></a>
+</p>
+
 # Laravel Wiki
 
-**A drop-in wiki for Laravel.** Install the package, run the migration, and your app has a wiki at `/wiki`. It has Markdown pages, `[[wiki links]]`, backlinks, full revision history with diffs, one-click restore, and search.
-
-There's no frontend build step, no JavaScript framework and no extra services. It uses the tables in your existing database and your app's own login.
+**A drop-in wiki for your Laravel app.** Markdown pages, `[[links]]` between them, and the full history of every change. It runs on your database and your logins, with no frontend build step and no extra services.
 
 ```
 composer require ruvelo/laravel-wiki
 php artisan migrate
 ```
 
-Then open `/wiki`.
+Then open `/wiki`. Or click around the [live demo](https://ruvelo.github.io/laravel-wiki/demo/) first.
 
----
+## A quick tour
+
+<img src="art/screenshot-page.png" alt="A wiki page with a table of contents, blue links to existing pages and a red link to a page not written yet">
+
+**Pages link to each other.** Write `[[Deploy guide]]` and it becomes a link. Pages that don't exist yet show in red, an open invitation to whoever knows the answer.
+
+<img src="art/screenshot-editor.png" alt="The editor: Markdown on the left, live preview on the right">
+
+**Edit with a live preview.** Markdown on the left, the finished page on the right, updated as you type.
+
+<img src="art/screenshot-diff.png" alt="A revision with added lines in green and removed lines in red">
+
+**Every save is kept.** See what changed, who changed it, and put any old version back in one click.
+
+<table>
+  <tr>
+    <td width="50%"><img src="art/screenshot-dark.png" alt="Dark mode"></td>
+    <td width="50%"><img src="art/screenshot-search.png" alt="Search results with highlighted matches"></td>
+  </tr>
+  <tr>
+    <td><strong>Light and dark</strong>, following each reader's system setting.</td>
+    <td><strong>Search</strong> with highlighted snippets; an exact title takes you straight to the page.</td>
+  </tr>
+</table>
 
 ## Features
 
 - **Markdown, GitHub-style**: headings, tables, task lists, fenced code, autolinks and strikethrough. Put `[TOC]` on its own line to get a table of contents.
-- **Wiki links**: `[[Deploy guide]]` or `[[Deploy guide|how we ship]]`. A link to a page that doesn't exist yet shows in red and opens the create form with the title filled in.
-- **Backlinks**: every page lists the pages that link to it ("What links here").
+- **Wiki links**: `[[Deploy guide]]` or `[[Deploy guide|how we ship]]`. A link to a page that doesn't exist yet shows in red; for editors it opens the create form with the title filled in.
+- **What links here**: every page lists the pages that link to it.
 - **Every save is a revision**: browse a page's history, see a line-by-line diff of each change, and restore any old version. A restore is itself a revision, so it can be undone.
-- **No lost edits**: if someone saves a page while you're editing it, your save is refused rather than overwriting theirs, and your text stays in the form.
-- **Preview before saving.**
-- **Search** across titles and content, with snippets. If your search exactly matches a page title, you go straight to that page.
+- **No lost edits**: if someone saves a page while you're editing it, your save is refused rather than overwriting theirs, and your text stays in the editor.
+- **Live preview** beside the editor, updated as you type.
+- **Search** across titles and content, with highlighted snippets.
 - **Recent changes** across the whole wiki.
 - **Safe to render**: raw HTML in the source is escaped and `javascript:` links are dropped. People with edit rights can't inject scripts.
 - **Readable URLs in any language**: `Café Crème` → `/wiki/café-crème`, `日本語` → `/wiki/日本語`.
@@ -122,6 +160,8 @@ Renaming a page keeps its address. Links written with the old title (`[[Old titl
 composer install
 composer test
 ```
+
+The demo and the screenshots are built from the package itself: `php demo/build.php build/site` writes the static demo, and `demo/screenshots.sh` regenerates the images in `art/`. The website deploys from `site/` to GitHub Pages on every push to `main`.
 
 ## Credits
 
