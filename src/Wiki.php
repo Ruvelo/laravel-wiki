@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use League\CommonMark\Environment\Environment;
+use Ruvelo\Wiki\Exceptions\EditConflict;
 use Ruvelo\Wiki\Exceptions\InvalidTitle;
 use Ruvelo\Wiki\Exceptions\PageAlreadyExists;
 use Ruvelo\Wiki\Markdown\Renderer;
@@ -55,14 +56,18 @@ final class Wiki
      * Create the page, or save a new version of it. Saving identical content
      * again records nothing.
      *
+     * Pass the revision you last read as $basedOn to be refused with an
+     * EditConflict if someone has saved the page since.
+     *
      * @throws InvalidTitle
+     * @throws EditConflict
      */
-    public static function write(string $title, string $body, ?string $summary = null, ?Authenticatable $author = null): Page
+    public static function write(string $title, string $body, ?string $summary = null, ?Authenticatable $author = null, ?int $basedOn = null): Page
     {
         $page = self::find($title) ?? Page::draft($title);
 
         if (! $page->isUnchanged($title, $body)) {
-            $page->commit($title, $body, $summary ?? ($page->exists ? null : 'Created page'), $author);
+            $page->commit($title, $body, $summary ?? ($page->exists ? null : 'Created page'), $author, $basedOn);
         }
 
         return $page;

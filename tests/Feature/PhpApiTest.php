@@ -82,6 +82,23 @@ class PhpApiTest extends TestCase
         $this->assertSame('v2', $page->fresh()->body);
     }
 
+    public function test_write_can_refuse_stale_edits(): void
+    {
+        $page = Wiki::write('Ops', 'v1');
+        $base = $page->currentRevisionId();
+        Wiki::write('Ops', 'v2', 'Someone else', null, $base);
+
+        try {
+            Wiki::write('Ops', 'v3', 'Mine', null, basedOn: $base);
+            $this->fail('Expected an edit conflict.');
+        } catch (EditConflict $e) {
+            $this->assertSame($base, $e->expectedRevision);
+            $this->assertSame($page->currentRevisionId(), $e->currentRevision);
+        }
+
+        $this->assertSame('v2', Wiki::find('Ops')?->body);
+    }
+
     public function test_search_and_render(): void
     {
         Wiki::create('Deploy guide', 'Ship it.');
