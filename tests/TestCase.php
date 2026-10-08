@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Tests;
 
-use Ruvelo\Wiki\WikiServiceProvider;
-use Ruvelo\Wiki\Tests\Fixtures\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Ruvelo\Wiki\Tests\Fixtures\User;
+use Ruvelo\Wiki\WikiServiceProvider;
 
 abstract class TestCase extends Orchestra
 {

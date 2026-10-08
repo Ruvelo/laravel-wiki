@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki;
 
-use Ruvelo\Wiki\Markdown\Renderer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Ruvelo\Wiki\Console\ExportCommand;
+use Ruvelo\Wiki\Console\ImportCommand;
+use Ruvelo\Wiki\Markdown\Renderer;
 
 class WikiServiceProvider extends ServiceProvider
 {
@@ -27,11 +31,17 @@ class WikiServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         }
 
+        if (config('wiki.api.enabled', false)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        }
+
         if (config('wiki.run_migrations', true)) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
 
         if ($this->app->runningInConsole()) {
+            $this->commands([ImportCommand::class, ExportCommand::class]);
+
             $this->publishes([
                 __DIR__.'/../config/wiki.php' => config_path('wiki.php'),
             ], 'wiki-config');

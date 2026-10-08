@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Tests\Feature;
 
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Ruvelo\Wiki\Events\PageSaved;
 use Ruvelo\Wiki\Models\Page;
 use Ruvelo\Wiki\Tests\TestCase;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
 
 class WikiTest extends TestCase
 {
@@ -16,6 +18,12 @@ class WikiTest extends TestCase
         $page->commit($title, $body, 'Created page');
 
         return $page;
+    }
+
+    public function test_the_json_api_is_off_by_default(): void
+    {
+        $this->assertFalse(app('router')->has('wiki.api.pages.index'));
+        $this->getJson('/api/wiki/pages')->assertNotFound();
     }
 
     public function test_the_root_shows_the_home_page(): void

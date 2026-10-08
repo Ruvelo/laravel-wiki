@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
 use Ruvelo\Wiki\Http\Controllers\HistoryController;
 use Ruvelo\Wiki\Http\Controllers\PageController;
 use Ruvelo\Wiki\Http\Controllers\SearchController;
 use Ruvelo\Wiki\Http\Middleware\AuthorizeEditing;
-use Illuminate\Support\Facades\Route;
 
 // Special pages live under "/_/". Slugs can never contain "_", so they can
 // never collide with a page.

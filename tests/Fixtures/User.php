@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Tests\Fixtures;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;

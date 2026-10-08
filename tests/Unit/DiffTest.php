@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Tests\Unit;
 
-use Ruvelo\Wiki\Support\Diff;
 use PHPUnit\Framework\TestCase;
+use Ruvelo\Wiki\Support\Diff;
 
 class DiffTest extends TestCase
 {

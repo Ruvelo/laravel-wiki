@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Tests\Feature;
 
 use Ruvelo\Wiki\Markdown\Renderer;
@@ -58,6 +60,19 @@ class RenderingTest extends TestCase
         $this->assertStringContainsString('<table>', $html);
         $this->assertStringContainsString('type="checkbox"', $html);
         $this->assertStringContainsString('heading-permalink', $html);
+    }
+
+    public function test_links_can_point_at_a_section(): void
+    {
+        (new Page(['slug' => 'ops']))->commit('Ops', "## Paging\n\nCall us.");
+
+        $html = $this->render('[[Ops#Paging]], [[Ops#Paging|call us]] and [[#Setup]]');
+
+        $this->assertStringContainsString('href="'.route('wiki.show', 'ops').'#content-paging">Ops › Paging</a>', $html);
+        $this->assertStringContainsString('#content-paging">call us</a>', $html);
+        $this->assertStringContainsString('<a class="wiki-link" href="#content-setup">Setup</a>', $html);
+        $this->assertStringContainsString('id="content-paging"', app(Renderer::class)->render('## Paging'));
+        $this->assertSame(['ops'], WikiLinks::targets('[[Ops#Paging]] [[#Setup]]'));
     }
 
     public function test_unicode_titles_keep_readable_slugs(): void

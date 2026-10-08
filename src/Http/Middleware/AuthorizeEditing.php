@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Http\Middleware;
 
 use Closure;
-use Ruvelo\Wiki\Wiki;
 use Illuminate\Http\Request;
+use Ruvelo\Wiki\Wiki;
 
 class AuthorizeEditing
 {

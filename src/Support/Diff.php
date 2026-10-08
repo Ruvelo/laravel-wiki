@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Support;
 
 final class Diff
@@ -17,8 +19,8 @@ final class Diff
      */
     public static function lines(string $old, string $new): array
     {
-        $a = $old === '' ? [] : preg_split('/\R/u', $old);
-        $b = $new === '' ? [] : preg_split('/\R/u', $new);
+        $a = self::split($old);
+        $b = self::split($new);
 
         // Trim the shared head and tail so the LCS only covers what changed.
         $start = 0;
@@ -125,6 +127,7 @@ final class Diff
     }
 
     /**
+     * @param  list<array{0: string, 1: string|int}>  $ops
      * @return array{added: int, removed: int}
      */
     public static function stats(array $ops): array
@@ -132,5 +135,13 @@ final class Diff
         $counts = array_count_values(array_column($ops, 0));
 
         return ['added' => $counts['+'] ?? 0, 'removed' => $counts['-'] ?? 0];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function split(string $text): array
+    {
+        return $text === '' ? [] : (preg_split('/\R/u', $text) ?: [$text]);
     }
 }

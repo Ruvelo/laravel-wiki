@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Http\Controllers;
 
-use Ruvelo\Wiki\Markdown\Renderer;
-use Ruvelo\Wiki\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Ruvelo\Wiki\Exceptions\EditConflict;
+use Ruvelo\Wiki\Exceptions\InvalidTitle;
+use Ruvelo\Wiki\Exceptions\PageAlreadyExists;
+use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Models\Page;
 use Symfony\Component\HttpFoundation\Response;
 
 class PageController extends Controller
@@ -41,6 +46,7 @@ class PageController extends Controller
         return response()->view('wiki::show', [
             'page' => $page,
             'html' => $page->html(),
+            'author' => $page->revisions()->with('author')->first()?->authorName(),
             'backlinks' => $page->backlinks()->orderBy('title')->get(['id', 'title', 'slug']),
         ]);
     }
@@ -64,17 +70,12 @@ class PageController extends Controller
             return $this->previewForm(null, $data, $renderer);
         }
 
-        $slug = Page::slugFor($data['title']);
-
-        if ($slug === '') {
-            throw ValidationException::withMessages(['title' => 'The title needs at least one letter or number.']);
+        try {
+            $page = Page::draft($data['title']);
+        } catch (InvalidTitle|PageAlreadyExists $e) {
+            throw ValidationException::withMessages(['title' => $e instanceof PageAlreadyExists ? 'A page with this title already exists.' : $e->getMessage()]);
         }
 
-        if (Page::query()->where('slug', $slug)->exists()) {
-            throw ValidationException::withMessages(['title' => 'A page with this title already exists.']);
-        }
-
-        $page = new Page(['slug' => $slug]);
         $page->commit($data['title'], $data['body'], $data['summary'] ?? 'Created page', $request->user());
 
         return redirect()->route('wiki.show', $page)->with('wiki.status', 'Page created.');
@@ -86,7 +87,7 @@ class PageController extends Controller
             'page' => $page,
             'title' => $page->title,
             'body' => $page->body,
-            'base' => $page->revisions()->value('id'),
+            'base' => $page->currentRevisionId(),
             'preview' => $page->html(),
         ]);
     }
@@ -109,19 +110,18 @@ class PageController extends Controller
             return $this->previewForm($page, $data, $renderer);
         }
 
-        // Someone saved since this editor opened the page: don't silently
-        // overwrite their work. The form comes back with the text intact.
-        if ((int) $request->input('base') !== (int) $page->revisions()->value('id')) {
+        if ($page->isUnchanged($data['title'], $data['body'])) {
+            return redirect()->route('wiki.show', $page)->with('wiki.status', 'No changes to save.');
+        }
+
+        try {
+            $page->commit($data['title'], $data['body'], $data['summary'] ?? null, $request->user(), $request->integer('base'));
+        } catch (EditConflict) {
+            // The form comes back with the editor's text intact.
             throw ValidationException::withMessages([
                 'body' => 'Someone else edited this page while you were working on it. Copy your changes, reload, and apply them again.',
             ]);
         }
-
-        if ($data['title'] === $page->title && $data['body'] === $page->body) {
-            return redirect()->route('wiki.show', $page)->with('wiki.status', 'No changes to save.');
-        }
-
-        $page->commit($data['title'], $data['body'], $data['summary'] ?? null, $request->user());
 
         return redirect()->route('wiki.show', $page)->with('wiki.status', 'Page saved.');
     }
@@ -150,6 +150,9 @@ class PageController extends Controller
         return $data;
     }
 
+    /**
+     * @param  array{title: string, body: string, summary?: string|null}  $data
+     */
     private function previewForm(?Page $page, array $data, Renderer $renderer): Response
     {
         return response()->view('wiki::edit', [

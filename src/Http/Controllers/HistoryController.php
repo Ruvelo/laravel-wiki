@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Http\Controllers;
 
-use Ruvelo\Wiki\Models\Page;
-use Ruvelo\Wiki\Models\Revision;
-use Ruvelo\Wiki\Support\Diff;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Models\Revision;
+use Ruvelo\Wiki\Support\Diff;
 use Symfony\Component\HttpFoundation\Response;
 
 class HistoryController extends Controller
@@ -33,7 +35,7 @@ class HistoryController extends Controller
             'previous' => $previous,
             'diff' => Diff::collapse($diff),
             'stats' => Diff::stats($diff),
-            'isCurrent' => $revision->id === $page->revisions()->value('id'),
+            'isCurrent' => $revision->id === $page->currentRevisionId(),
         ]);
     }
 

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Models;
 
-use Ruvelo\Wiki\Wiki;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Ruvelo\Wiki\Wiki;
 
 /**
  * @property int $id
@@ -13,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $body
  * @property string|null $summary
  * @property string|null $user_id
- * @property \Illuminate\Support\Carbon $created_at
+ * @property Carbon $created_at
  */
 class Revision extends Model
 {
@@ -26,11 +29,17 @@ class Revision extends Model
         return config('wiki.table_prefix', 'wiki_').'revisions';
     }
 
+    /**
+     * @return BelongsTo<Page, $this>
+     */
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);
     }
 
+    /**
+     * @return BelongsTo<Model, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(Wiki::userModel(), 'user_id');

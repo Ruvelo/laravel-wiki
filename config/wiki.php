@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -33,6 +35,41 @@ return [
     'middleware' => ['web'],
 
     'edit_middleware' => ['auth'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | JSON API
+    |--------------------------------------------------------------------------
+    |
+    | A REST API for pages and revisions under `prefix`, off by default.
+    | Reads need `middleware`; writes also need the `wiki-edit` gate. The
+    | default middleware expects Laravel Sanctum; use your own guard if not.
+    |
+    */
+
+    'api' => [
+        'enabled' => (bool) env('WIKI_API', false),
+        'prefix' => 'api/wiki',
+        'middleware' => ['api', 'auth:sanctum'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Markdown
+    |--------------------------------------------------------------------------
+    |
+    | Extra CommonMark extensions (class names or instances), and options
+    | merged over the defaults. Raw HTML is escaped unless you change
+    | `html_input`; only do that if every editor is trusted.
+    |
+    */
+
+    'markdown' => [
+        'extensions' => [
+            // League\CommonMark\Extension\Footnote\FootnoteExtension::class,
+        ],
+        'options' => [],
+    ],
 
     /*
     |--------------------------------------------------------------------------

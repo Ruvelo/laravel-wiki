@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ruvelo\Wiki\Http\Controllers;
 
-use Ruvelo\Wiki\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Ruvelo\Wiki\Models\Page;
 use Symfony\Component\HttpFoundation\Response;
 
 class SearchController extends Controller
@@ -24,15 +26,8 @@ class SearchController extends Controller
             return redirect()->route('wiki.show', $exact);
         }
 
-        // "!" rather than backslash: SQLite has no default escape character
-        // and MySQL treats backslash specially, but "!" means the same on all.
-        $term = '%'.strtr($query, ['!' => '!!', '%' => '!%', '_' => '!_']).'%';
-        $like = fn (string $column) => "{$column} like ? escape '!'";
-
         $pages = Page::query()
-            ->where(fn ($where) => $where->whereRaw($like('title'), [$term])->orWhereRaw($like('body'), [$term]))
-            ->orderByRaw('case when '.$like('title').' then 0 else 1 end', [$term])
-            ->orderBy('title')
+            ->matching($query)
             ->paginate(config('wiki.per_page', 50))
             ->withQueryString();
 

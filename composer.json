@@ -20,16 +20,19 @@
     ],
     "require": {
         "php": "^8.3",
-        "laravel/framework": "^12.0|^13.0",
+        "laravel/framework": "^12.4.1|^13.0",
         "league/commonmark": "^2.6"
     },
     "require-dev": {
+        "larastan/larastan": "^3.13",
+        "laravel/pint": "^1.32",
         "orchestra/testbench": "^10.0|^11.0",
         "phpunit/phpunit": "^11.5|^12.0"
     },
     "autoload": {
         "psr-4": {
-            "Ruvelo\\Wiki\\": "src/"
+            "Ruvelo\\Wiki\\": "src/",
+            "Ruvelo\\Wiki\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
@@ -45,7 +48,16 @@
         }
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit",
+        "lint": "pint --test",
+        "format": "pint",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ],
+        "demo": "php demo/build.php build/site && cp -r site/. build/site/ && cp -r art build/site/art && echo 'Serve it: php -S 127.0.0.1:8000 -t build'"
     },
     "config": {
         "sort-packages": true
@@ -55,5 +67,13 @@
     "support": {
         "issues": "https://github.com/ruvelo/laravel-wiki/issues",
         "source": "https://github.com/ruvelo/laravel-wiki"
+    },
+    "scripts-descriptions": {
+        "test": "Run the test suite",
+        "lint": "Check code style",
+        "format": "Fix code style",
+        "analyse": "Run static analysis",
+        "check": "Lint, analyse and test: what CI runs",
+        "demo": "Build the static demo site into build/"
     }
 }
