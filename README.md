@@ -1,11 +1,11 @@
-# Lore
+# Laravel Wiki
 
 **A drop-in wiki for Laravel.** Install the package, run the migration, and your app has a wiki at `/wiki`. It has Markdown pages, `[[wiki links]]`, backlinks, full revision history with diffs, one-click restore, and search.
 
 There's no frontend build step, no JavaScript framework and no extra services. It uses the tables in your existing database and your app's own login.
 
 ```
-composer require francoisbultez/lore
+composer require ruvelo/laravel-wiki
 php artisan migrate
 ```
 
@@ -35,12 +35,12 @@ Then open `/wiki`.
 
 ## Who can edit
 
-By default, **anyone can read and any signed-in user can edit.** To narrow that, define a `lore-edit` gate, for example in your `AppServiceProvider`:
+By default, **anyone can read and any signed-in user can edit.** To narrow that, define a `wiki-edit` gate, for example in your `AppServiceProvider`:
 
 ```php
 use Illuminate\Support\Facades\Gate;
 
-Gate::define('lore-edit', fn ($user) => $user->is_admin);
+Gate::define('wiki-edit', fn ($user) => $user->is_admin);
 ```
 
 To make the whole wiki private, wrap every route in `auth` through the config:
@@ -54,18 +54,18 @@ To make the whole wiki private, wrap every route in `auth` through the config:
 Publish the config file if you want to change the defaults:
 
 ```
-php artisan vendor:publish --tag=lore-config
+php artisan vendor:publish --tag=wiki-config
 ```
 
 | Key | Default | |
 |---|---|---|
-| `name` | `Wiki` (`LORE_NAME`) | Shown in the header and page titles |
-| `path` | `wiki` (`LORE_PATH`) | URL prefix |
+| `name` | `Wiki` (`WIKI_NAME`) | Shown in the header and page titles |
+| `path` | `wiki` (`WIKI_PATH`) | URL prefix |
 | `domain` | `null` | Serve the wiki on its own (sub)domain |
 | `middleware` | `['web']` | Applied to every route |
 | `edit_middleware` | `['auth']` | Added for create/edit/delete/restore |
 | `home` | `home` | Slug shown at the wiki root |
-| `table_prefix` | `lore_` | Tables are `{prefix}pages`, `{prefix}revisions`, `{prefix}links` |
+| `table_prefix` | `wiki_` | Tables are `{prefix}pages`, `{prefix}revisions`, `{prefix}links` |
 | `run_migrations` | `true` | Set to `false` if you publish and manage the migration yourself |
 | `user_model` | your `users` provider model | Who revisions are attributed to |
 | `user_name_attribute` | `name` | Shown as the author in the history |
@@ -77,15 +77,15 @@ php artisan vendor:publish --tag=lore-config
 The views are plain Blade with the styles inlined in one layout. Publish them and edit as you like:
 
 ```
-php artisan vendor:publish --tag=lore-views
+php artisan vendor:publish --tag=wiki-views
 ```
 
-They land in `resources/views/vendor/lore`. Every page extends `layout.blade.php`, so swapping that one file for your own layout is enough to put the wiki inside your app's chrome. Each page fills a `content` section and a `title` section. The layout also has a `lore-head` stack for extra `<head>` tags, and colors are CSS variables (`--lore-accent` and friends) at the top of the layout.
+They land in `resources/views/vendor/wiki`. Every page extends `layout.blade.php`, so swapping that one file for your own layout is enough to put the wiki inside your app's chrome. Each page fills a `content` section and a `title` section. The layout also has a `wiki-head` stack for extra `<head>` tags, and colors are CSS variables (`--wiki-accent` and friends) at the top of the layout.
 
 ## Using it from code
 
 ```php
-use FrancoisBultez\Lore\Models\Page;
+use Ruvelo\Wiki\Models\Page;
 
 // Create or update a page; the commit is recorded as a revision.
 $page = Page::firstOrNew(['slug' => Page::slugFor('Release notes')]);
@@ -96,7 +96,7 @@ $page->revisions;            // newest first
 $page->backlinks()->get();   // pages linking here
 ```
 
-The `FrancoisBultez\Lore\Events\PageSaved` event fires after every create, edit and restore, carrying `$page` and `$revision`. Hook it up for notifications, search indexing or cache busting.
+The `Ruvelo\Wiki\Events\PageSaved` event fires after every create, edit and restore, carrying `$page` and `$revision`. Hook it up for notifications, search indexing or cache busting.
 
 ## URLs
 
@@ -122,6 +122,10 @@ Renaming a page keeps its address. Links written with the old title (`[[Old titl
 composer install
 composer test
 ```
+
+## Credits
+
+Built by [François Bultez](https://github.com/francoisbultez) at [Ruvelo](https://github.com/ruvelo).
 
 ## License
 

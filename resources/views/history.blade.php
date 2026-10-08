@@ -1,17 +1,17 @@
-@extends('lore::layout')
+@extends('wiki::layout')
 
 @section('title', 'History of '.$page->title)
 
 @section('content')
-    <div class="lore-head">
-        <h1>History of <a href="{{ route('lore.show', $page) }}">{{ $page->title }}</a></h1>
+    <div class="wiki-head">
+        <h1>History of <a href="{{ route('wiki.show', $page) }}">{{ $page->title }}</a></h1>
     </div>
 
-    <ul class="lore-list">
+    <ul class="wiki-list">
         @foreach ($revisions as $revision)
             <li>
                 <span>
-                    <a href="{{ route('lore.revision', [$page, $revision]) }}">#{{ $revision->id }}</a>
+                    <a href="{{ route('wiki.revision', [$page, $revision]) }}">#{{ $revision->id }}</a>
                     {{ $revision->summary ?: '—' }}
                     @if ($loop->first && $revisions->onFirstPage())
                         <small>(current)</small>

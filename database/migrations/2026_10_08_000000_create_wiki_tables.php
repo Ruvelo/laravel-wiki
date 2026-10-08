@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $prefix = config('lore.table_prefix', 'lore_');
+        $prefix = config('wiki.table_prefix', 'wiki_');
 
         Schema::create($prefix.'pages', function (Blueprint $table) {
             $table->id();
@@ -38,7 +38,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $prefix = config('lore.table_prefix', 'lore_');
+        $prefix = config('wiki.table_prefix', 'wiki_');
 
         Schema::dropIfExists($prefix.'links');
         Schema::dropIfExists($prefix.'revisions');

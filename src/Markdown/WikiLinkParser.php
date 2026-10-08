@@ -1,10 +1,10 @@
 <?php
 
-namespace FrancoisBultez\Lore\Markdown;
+namespace Ruvelo\Wiki\Markdown;
 
 use Closure;
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Support\WikiLinks;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Support\WikiLinks;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Link;
 use League\CommonMark\Parser\Inline\InlineParserInterface;
 use League\CommonMark\Parser\Inline\InlineParserMatch;
@@ -12,7 +12,7 @@ use League\CommonMark\Parser\InlineParserContext;
 
 /**
  * Turns [[Target]] and [[Target|label]] into links. Links to pages that don't
- * exist yet get the `lore-link--new` class and point at the create form.
+ * exist yet get the `wiki-link--new` class and point at the create form.
  */
 final class WikiLinkParser implements InlineParserInterface
 {
@@ -41,11 +41,11 @@ final class WikiLinkParser implements InlineParserInterface
 
         $exists = ($this->exists)($slug);
         $url = $exists
-            ? route('lore.show', $slug)
-            : route('lore.create', ['title' => $target]);
+            ? route('wiki.show', $slug)
+            : route('wiki.create', ['title' => $target]);
 
         $link = new Link($url, trim($label ?? '') ?: $target);
-        $link->data->set('attributes/class', $exists ? 'lore-link' : 'lore-link lore-link--new');
+        $link->data->set('attributes/class', $exists ? 'wiki-link' : 'wiki-link wiki-link--new');
 
         $inlineContext->getContainer()->appendChild($link);
 

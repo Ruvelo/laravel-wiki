@@ -1,10 +1,10 @@
 <?php
 
-namespace FrancoisBultez\Lore\Http\Controllers;
+namespace Ruvelo\Wiki\Http\Controllers;
 
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Models\Revision;
-use FrancoisBultez\Lore\Support\Diff;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Models\Revision;
+use Ruvelo\Wiki\Support\Diff;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -17,9 +17,9 @@ class HistoryController extends Controller
         $revisions = $page->revisions()
             ->with('author')
             ->select(['id', 'page_id', 'title', 'summary', 'user_id', 'created_at'])
-            ->paginate(config('lore.per_page', 50));
+            ->paginate(config('wiki.per_page', 50));
 
-        return response()->view('lore::history', ['page' => $page, 'revisions' => $revisions]);
+        return response()->view('wiki::history', ['page' => $page, 'revisions' => $revisions]);
     }
 
     public function show(Page $page, Revision $revision): Response
@@ -27,7 +27,7 @@ class HistoryController extends Controller
         $previous = $revision->previous();
         $diff = Diff::lines($previous->body ?? '', $revision->body);
 
-        return response()->view('lore::revision', [
+        return response()->view('wiki::revision', [
             'page' => $page,
             'revision' => $revision,
             'previous' => $previous,
@@ -41,7 +41,7 @@ class HistoryController extends Controller
     {
         $page->commit($revision->title, $revision->body, "Restored revision #{$revision->id}", $request->user());
 
-        return redirect()->route('lore.show', $page)->with('lore.status', "Restored revision #{$revision->id}.");
+        return redirect()->route('wiki.show', $page)->with('wiki.status', "Restored revision #{$revision->id}.");
     }
 
     public function recent(): Response
@@ -50,8 +50,8 @@ class HistoryController extends Controller
             ->with(['page:id,title,slug', 'author'])
             ->select(['id', 'page_id', 'title', 'summary', 'user_id', 'created_at'])
             ->orderByDesc('id')
-            ->paginate(config('lore.per_page', 50));
+            ->paginate(config('wiki.per_page', 50));
 
-        return response()->view('lore::recent', ['revisions' => $revisions]);
+        return response()->view('wiki::recent', ['revisions' => $revisions]);
     }
 }

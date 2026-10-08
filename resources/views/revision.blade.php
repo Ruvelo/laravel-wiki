@@ -1,23 +1,23 @@
-@extends('lore::layout')
+@extends('wiki::layout')
 
 @section('title', $page->title.' · revision #'.$revision->id)
 
 @section('content')
-    <div class="lore-head">
-        <h1><a href="{{ route('lore.show', $page) }}">{{ $page->title }}</a> · #{{ $revision->id }}</h1>
-        <div class="lore-actions">
-            <a href="{{ route('lore.history', $page) }}">All revisions</a>
+    <div class="wiki-head">
+        <h1><a href="{{ route('wiki.show', $page) }}">{{ $page->title }}</a> · #{{ $revision->id }}</h1>
+        <div class="wiki-actions">
+            <a href="{{ route('wiki.history', $page) }}">All revisions</a>
         </div>
     </div>
 
-    <p class="lore-meta">
+    <p class="wiki-meta">
         {{ $revision->authorName() ?? 'someone' }}, {{ $revision->created_at->toDayDateTimeString() }}
         @if ($revision->summary) · {{ $revision->summary }} @endif
         @if ($isCurrent) · <strong>current version</strong> @endif
     </p>
 
     @if ($canEdit && ! $isCurrent)
-        <form method="post" action="{{ route('lore.restore', [$page, $revision]) }}">
+        <form method="post" action="{{ route('wiki.restore', [$page, $revision]) }}">
             @csrf
             <button type="submit">Restore this version</button>
         </form>
@@ -25,8 +25,8 @@
 
     <h2>
         {{ $previous ? 'Changes since #'.$previous->id : 'First version' }}
-        <small class="lore-muted" style="font-size: .9rem; font-family: var(--lore-sans)">
-            <span class="lore-add">+{{ $stats['added'] }}</span> <span class="lore-del">−{{ $stats['removed'] }}</span>
+        <small class="wiki-muted" style="font-size: .9rem; font-family: var(--wiki-sans)">
+            <span class="wiki-add">+{{ $stats['added'] }}</span> <span class="wiki-del">−{{ $stats['removed'] }}</span>
         </small>
     </h2>
 
@@ -35,9 +35,9 @@
     @endif
 
     @if ($stats['added'] + $stats['removed'] === 0)
-        <p class="lore-muted">The content didn't change.</p>
+        <p class="wiki-muted">The content didn't change.</p>
     @else
-        <div class="lore-diff" role="table" aria-label="Line changes">
+        <div class="wiki-diff" role="table" aria-label="Line changes">
             @foreach ($diff as [$op, $line])
                 <div class="{{ ['+' => 'add', '-' => 'del', ' ' => 'eq'][$op] }}">{{ $op }} {{ $line }}</div>
             @endforeach

@@ -1,10 +1,10 @@
 <?php
 
-namespace FrancoisBultez\Lore\Tests\Feature;
+namespace Ruvelo\Wiki\Tests\Feature;
 
-use FrancoisBultez\Lore\Events\PageSaved;
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Tests\TestCase;
+use Ruvelo\Wiki\Events\PageSaved;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Tests\TestCase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 
@@ -45,7 +45,7 @@ class WikiTest extends TestCase
 
     public function test_a_gate_can_restrict_editing(): void
     {
-        Gate::define('lore-edit', fn ($user) => $user->name === 'Editor');
+        Gate::define('wiki-edit', fn ($user) => $user->name === 'Editor');
 
         $this->actingAs($this->user('Reader'))->get('/wiki/_/new')->assertForbidden();
         $this->actingAs($this->user('Editor'))->get('/wiki/_/new')->assertOk();
@@ -108,7 +108,7 @@ class WikiTest extends TestCase
 
         $this->actingAs($this->user())
             ->put('/wiki/home', ['title' => 'Home', 'body' => 'same', 'base' => $page->revisions()->value('id')])
-            ->assertSessionHas('lore.status', 'No changes to save.');
+            ->assertSessionHas('wiki.status', 'No changes to save.');
 
         $this->assertSame(1, $page->revisions()->count());
     }
@@ -172,8 +172,8 @@ class WikiTest extends TestCase
         $this->actingAs($this->user())->delete('/wiki/home')->assertRedirect('/wiki/_/pages');
 
         $this->assertFalse(Page::whereKey($page->id)->exists());
-        $this->assertDatabaseCount('lore_revisions', 0);
-        $this->assertDatabaseCount('lore_links', 0);
+        $this->assertDatabaseCount('wiki_revisions', 0);
+        $this->assertDatabaseCount('wiki_links', 0);
     }
 
     public function test_search_matches_titles_and_bodies(): void

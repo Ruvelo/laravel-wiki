@@ -5,7 +5,7 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
     <testsuites>
-        <testsuite name="Lore">
+        <testsuite name="Laravel Wiki">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

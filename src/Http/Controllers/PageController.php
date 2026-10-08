@@ -1,9 +1,9 @@
 <?php
 
-namespace FrancoisBultez\Lore\Http\Controllers;
+namespace Ruvelo\Wiki\Http\Controllers;
 
-use FrancoisBultez\Lore\Markdown\Renderer;
-use FrancoisBultez\Lore\Models\Page;
+use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -15,16 +15,16 @@ class PageController extends Controller
 {
     public function home(): Response
     {
-        return $this->show(config('lore.home', 'home'));
+        return $this->show(config('wiki.home', 'home'));
     }
 
     public function index(): Response
     {
         $pages = Page::query()
             ->orderBy('title')
-            ->paginate(config('lore.per_page', 50), ['id', 'title', 'slug', 'updated_at']);
+            ->paginate(config('wiki.per_page', 50), ['id', 'title', 'slug', 'updated_at']);
 
-        return response()->view('lore::index', ['pages' => $pages]);
+        return response()->view('wiki::index', ['pages' => $pages]);
     }
 
     public function show(string $slug): Response
@@ -32,13 +32,13 @@ class PageController extends Controller
         $page = Page::query()->where('slug', $slug)->first();
 
         if ($page === null) {
-            return response()->view('lore::missing', [
+            return response()->view('wiki::missing', [
                 'slug' => $slug,
                 'title' => Str::ucfirst(str_replace('-', ' ', $slug)),
             ], 404);
         }
 
-        return response()->view('lore::show', [
+        return response()->view('wiki::show', [
             'page' => $page,
             'html' => $page->html(),
             'backlinks' => $page->backlinks()->orderBy('title')->get(['id', 'title', 'slug']),
@@ -47,7 +47,7 @@ class PageController extends Controller
 
     public function create(Request $request): Response
     {
-        return response()->view('lore::edit', [
+        return response()->view('wiki::edit', [
             'page' => null,
             'title' => (string) $request->query('title', ''),
             'body' => '',
@@ -77,12 +77,12 @@ class PageController extends Controller
         $page = new Page(['slug' => $slug]);
         $page->commit($data['title'], $data['body'], $data['summary'] ?? 'Created page', $request->user());
 
-        return redirect()->route('lore.show', $page)->with('lore.status', 'Page created.');
+        return redirect()->route('wiki.show', $page)->with('wiki.status', 'Page created.');
     }
 
     public function edit(Page $page): Response
     {
-        return response()->view('lore::edit', [
+        return response()->view('wiki::edit', [
             'page' => $page,
             'title' => $page->title,
             'body' => $page->body,
@@ -108,19 +108,19 @@ class PageController extends Controller
         }
 
         if ($data['title'] === $page->title && $data['body'] === $page->body) {
-            return redirect()->route('lore.show', $page)->with('lore.status', 'No changes to save.');
+            return redirect()->route('wiki.show', $page)->with('wiki.status', 'No changes to save.');
         }
 
         $page->commit($data['title'], $data['body'], $data['summary'] ?? null, $request->user());
 
-        return redirect()->route('lore.show', $page)->with('lore.status', 'Page saved.');
+        return redirect()->route('wiki.show', $page)->with('wiki.status', 'Page saved.');
     }
 
     public function destroy(Page $page): RedirectResponse
     {
         $page->delete();
 
-        return redirect()->route('lore.index')->with('lore.status', "Deleted “{$page->title}”.");
+        return redirect()->route('wiki.index')->with('wiki.status', "Deleted “{$page->title}”.");
     }
 
     /**
@@ -142,7 +142,7 @@ class PageController extends Controller
 
     private function preview(?Page $page, array $data, Renderer $renderer): Response
     {
-        return response()->view('lore::edit', [
+        return response()->view('wiki::edit', [
             'page' => $page,
             'title' => $data['title'],
             'body' => $data['body'],

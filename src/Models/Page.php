@@ -1,10 +1,10 @@
 <?php
 
-namespace FrancoisBultez\Lore\Models;
+namespace Ruvelo\Wiki\Models;
 
-use FrancoisBultez\Lore\Events\PageSaved;
-use FrancoisBultez\Lore\Markdown\Renderer;
-use FrancoisBultez\Lore\Support\WikiLinks;
+use Ruvelo\Wiki\Events\PageSaved;
+use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Support\WikiLinks;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -37,12 +37,12 @@ class Page extends Model
 
     public function getTable(): string
     {
-        return config('lore.table_prefix', 'lore_').'pages';
+        return config('wiki.table_prefix', 'wiki_').'pages';
     }
 
     public static function linksTable(): string
     {
-        return config('lore.table_prefix', 'lore_').'links';
+        return config('wiki.table_prefix', 'wiki_').'links';
     }
 
     public function getRouteKeyName(): string

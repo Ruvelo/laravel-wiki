@@ -1,9 +1,9 @@
 <?php
 
-namespace FrancoisBultez\Lore\Events;
+namespace Ruvelo\Wiki\Events;
 
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Models\Revision;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Models\Revision;
 use Illuminate\Foundation\Events\Dispatchable;
 
 /**

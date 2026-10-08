@@ -1,22 +1,22 @@
-@extends('lore::layout')
+@extends('wiki::layout')
 
 @section('title', 'Recent changes')
 
 @section('content')
-    <div class="lore-head">
+    <div class="wiki-head">
         <h1>Recent changes</h1>
     </div>
 
     @if ($revisions->isEmpty())
-        <p class="lore-muted">No edits yet.</p>
+        <p class="wiki-muted">No edits yet.</p>
     @else
-        <ul class="lore-list">
+        <ul class="wiki-list">
             @foreach ($revisions as $revision)
                 <li>
                     <span>
-                        <a href="{{ route('lore.show', $revision->page) }}">{{ $revision->page->title }}</a>
-                        · <a href="{{ route('lore.revision', [$revision->page, $revision]) }}">#{{ $revision->id }}</a>
-                        <span class="lore-muted">{{ $revision->summary }}</span>
+                        <a href="{{ route('wiki.show', $revision->page) }}">{{ $revision->page->title }}</a>
+                        · <a href="{{ route('wiki.revision', [$revision->page, $revision]) }}">#{{ $revision->id }}</a>
+                        <span class="wiki-muted">{{ $revision->summary }}</span>
                     </span>
                     <small>
                         {{ $revision->authorName() ?? 'someone' }},

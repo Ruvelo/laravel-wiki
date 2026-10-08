@@ -1,9 +1,9 @@
 <?php
 
-namespace FrancoisBultez\Lore\Markdown;
+namespace Ruvelo\Wiki\Markdown;
 
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Support\WikiLinks;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Support\WikiLinks;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
@@ -35,7 +35,7 @@ class Renderer
             'table_of_contents' => [
                 'position' => 'placeholder',
                 'placeholder' => '[TOC]',
-                'html_class' => 'lore-toc',
+                'html_class' => 'wiki-toc',
             ],
         ]);
 

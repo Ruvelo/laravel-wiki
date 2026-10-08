@@ -1,11 +1,11 @@
 <?php
 
-namespace FrancoisBultez\Lore\Tests\Feature;
+namespace Ruvelo\Wiki\Tests\Feature;
 
-use FrancoisBultez\Lore\Markdown\Renderer;
-use FrancoisBultez\Lore\Models\Page;
-use FrancoisBultez\Lore\Support\WikiLinks;
-use FrancoisBultez\Lore\Tests\TestCase;
+use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Support\WikiLinks;
+use Ruvelo\Wiki\Tests\TestCase;
 
 class RenderingTest extends TestCase
 {
@@ -20,8 +20,8 @@ class RenderingTest extends TestCase
 
         $html = $this->render('See [[Deploy guide]] and [[On-call rota|the rota]].');
 
-        $this->assertStringContainsString('<a class="lore-link" href="'.route('lore.show', 'deploy-guide').'">Deploy guide</a>', $html);
-        $this->assertStringContainsString('<a class="lore-link lore-link--new" href="'.route('lore.create', ['title' => 'On-call rota']).'">the rota</a>', $html);
+        $this->assertStringContainsString('<a class="wiki-link" href="'.route('wiki.show', 'deploy-guide').'">Deploy guide</a>', $html);
+        $this->assertStringContainsString('<a class="wiki-link wiki-link--new" href="'.route('wiki.create', ['title' => 'On-call rota']).'">the rota</a>', $html);
     }
 
     public function test_wiki_links_inside_code_are_left_alone(): void
@@ -45,7 +45,7 @@ class RenderingTest extends TestCase
     {
         $html = $this->render("[TOC]\n\n## Setup\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n- [x] done");
 
-        $this->assertStringContainsString('class="lore-toc"', $html);
+        $this->assertStringContainsString('class="wiki-toc"', $html);
         $this->assertStringContainsString('<table>', $html);
         $this->assertStringContainsString('type="checkbox"', $html);
         $this->assertStringContainsString('heading-permalink', $html);

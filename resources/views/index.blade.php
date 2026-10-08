@@ -1,24 +1,24 @@
-@extends('lore::layout')
+@extends('wiki::layout')
 
 @section('title', 'All pages')
 
 @section('content')
-    <div class="lore-head">
+    <div class="wiki-head">
         <h1>All pages</h1>
-        <span class="lore-muted">{{ number_format($pages->total()) }} {{ \Illuminate\Support\Str::plural('page', $pages->total()) }}</span>
+        <span class="wiki-muted">{{ number_format($pages->total()) }} {{ \Illuminate\Support\Str::plural('page', $pages->total()) }}</span>
     </div>
 
     @if ($pages->isEmpty())
         <p>The wiki is empty.
             @if ($canEdit)
-                <a href="{{ route('lore.create', ['title' => \Illuminate\Support\Str::ucfirst(config('lore.home'))]) }}">Write the first page.</a>
+                <a href="{{ route('wiki.create', ['title' => \Illuminate\Support\Str::ucfirst(config('wiki.home'))]) }}">Write the first page.</a>
             @endif
         </p>
     @else
-        <ul class="lore-list">
+        <ul class="wiki-list">
             @foreach ($pages as $page)
                 <li>
-                    <a href="{{ route('lore.show', $page) }}">{{ $page->title }}</a>
+                    <a href="{{ route('wiki.show', $page) }}">{{ $page->title }}</a>
                     <small>edited {{ $page->updated_at->diffForHumans() }}</small>
                 </li>
             @endforeach

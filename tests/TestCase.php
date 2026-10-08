@@ -1,9 +1,9 @@
 <?php
 
-namespace FrancoisBultez\Lore\Tests;
+namespace Ruvelo\Wiki\Tests;
 
-use FrancoisBultez\Lore\LoreServiceProvider;
-use FrancoisBultez\Lore\Tests\Fixtures\User;
+use Ruvelo\Wiki\WikiServiceProvider;
+use Ruvelo\Wiki\Tests\Fixtures\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +15,7 @@ abstract class TestCase extends Orchestra
 
     protected function getPackageProviders($app): array
     {
-        return [LoreServiceProvider::class];
+        return [WikiServiceProvider::class];
     }
 
     protected function defineEnvironment($app): void

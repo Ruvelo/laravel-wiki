@@ -1,8 +1,8 @@
 <?php
 
-namespace FrancoisBultez\Lore\Models;
+namespace Ruvelo\Wiki\Models;
 
-use FrancoisBultez\Lore\Lore;
+use Ruvelo\Wiki\Wiki;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,7 +23,7 @@ class Revision extends Model
 
     public function getTable(): string
     {
-        return config('lore.table_prefix', 'lore_').'revisions';
+        return config('wiki.table_prefix', 'wiki_').'revisions';
     }
 
     public function page(): BelongsTo
@@ -33,12 +33,12 @@ class Revision extends Model
 
     public function author(): BelongsTo
     {
-        return $this->belongsTo(Lore::userModel(), 'user_id');
+        return $this->belongsTo(Wiki::userModel(), 'user_id');
     }
 
     public function authorName(): ?string
     {
-        return $this->author?->getAttribute(config('lore.user_name_attribute', 'name'));
+        return $this->author?->getAttribute(config('wiki.user_name_attribute', 'name'));
     }
 
     /**

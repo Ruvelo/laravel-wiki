@@ -1,6 +1,6 @@
 <?php
 
-namespace FrancoisBultez\Lore\Support;
+namespace Ruvelo\Wiki\Support;
 
 final class Diff
 {

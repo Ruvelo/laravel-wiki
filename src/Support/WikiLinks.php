@@ -1,8 +1,8 @@
 <?php
 
-namespace FrancoisBultez\Lore\Support;
+namespace Ruvelo\Wiki\Support;
 
-use FrancoisBultez\Lore\Models\Page;
+use Ruvelo\Wiki\Models\Page;
 
 final class WikiLinks
 {

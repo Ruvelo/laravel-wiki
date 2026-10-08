@@ -1,8 +1,8 @@
 <?php
 
-namespace FrancoisBultez\Lore\Tests\Unit;
+namespace Ruvelo\Wiki\Tests\Unit;
 
-use FrancoisBultez\Lore\Support\Diff;
+use Ruvelo\Wiki\Support\Diff;
 use PHPUnit\Framework\TestCase;
 
 class DiffTest extends TestCase

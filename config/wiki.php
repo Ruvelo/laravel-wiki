@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'name' => env('LORE_NAME', 'Wiki'),
+    'name' => env('WIKI_NAME', 'Wiki'),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
 
     'routes' => true,
 
-    'path' => env('LORE_PATH', 'wiki'),
+    'path' => env('WIKI_PATH', 'wiki'),
 
     'domain' => null,
 
@@ -50,13 +50,13 @@ return [
     | Storage
     |--------------------------------------------------------------------------
     |
-    | Lore creates three tables: {prefix}pages, {prefix}revisions and
+    | The wiki creates three tables: {prefix}pages, {prefix}revisions and
     | {prefix}links. Set `run_migrations` to false if you publish the
     | migration and run it yourself.
     |
     */
 
-    'table_prefix' => 'lore_',
+    'table_prefix' => 'wiki_',
 
     'run_migrations' => true,
 

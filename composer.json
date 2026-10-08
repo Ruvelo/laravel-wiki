@@ -1,5 +1,5 @@
 {
-    "name": "francoisbultez/lore",
+    "name": "ruvelo/laravel-wiki",
     "description": "A drop-in wiki for Laravel: Markdown pages, [[wiki links]], backlinks, full revision history with diffs, and search.",
     "keywords": [
         "laravel",
@@ -10,10 +10,12 @@
     ],
     "license": "MIT",
     "type": "library",
-    "homepage": "https://github.com/francoisbultez/lore",
+    "homepage": "https://github.com/ruvelo/laravel-wiki",
     "authors": [
         {
-            "name": "Francois Bultez"
+            "name": "François Bultez",
+            "homepage": "https://github.com/francoisbultez",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -27,18 +29,18 @@
     },
     "autoload": {
         "psr-4": {
-            "FrancoisBultez\\Lore\\": "src/"
+            "Ruvelo\\Wiki\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "FrancoisBultez\\Lore\\Tests\\": "tests/"
+            "Ruvelo\\Wiki\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "FrancoisBultez\\Lore\\LoreServiceProvider"
+                "Ruvelo\\Wiki\\WikiServiceProvider"
             ]
         }
     },
@@ -49,5 +51,9 @@
         "sort-packages": true
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "support": {
+        "issues": "https://github.com/ruvelo/laravel-wiki/issues",
+        "source": "https://github.com/ruvelo/laravel-wiki"
+    }
 }
