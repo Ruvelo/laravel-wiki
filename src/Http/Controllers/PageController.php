@@ -14,6 +14,7 @@ use Ruvelo\Wiki\Exceptions\InvalidTitle;
 use Ruvelo\Wiki\Exceptions\PageAlreadyExists;
 use Ruvelo\Wiki\Markdown\Renderer;
 use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Support\Navigation;
 use Symfony\Component\HttpFoundation\Response;
 
 class PageController extends Controller
@@ -43,9 +44,12 @@ class PageController extends Controller
             ], 404);
         }
 
+        $html = $page->html();
+
         return response()->view('wiki::show', [
             'page' => $page,
-            'html' => $page->html(),
+            'html' => $html,
+            'outline' => Navigation::outline($html),
             'author' => $page->revisions()->with('author')->first()?->authorName(),
             'backlinks' => $page->backlinks()->orderBy('title')->get(['id', 'title', 'slug']),
         ]);

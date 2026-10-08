@@ -27,8 +27,6 @@ MD;
 $deployV2 = <<<'MD'
 Every merge to `main` ships to production, usually within four minutes. There is no release train and no deploy freeze.
 
-[TOC]
-
 ## Shipping a change
 
 1. Branch from `main` and open a pull request.
@@ -54,8 +52,6 @@ MD;
 
 $deployV3 = <<<'MD'
 Every merge to `main` ships to production, usually within four minutes. There is no release train and no deploy freeze.
-
-[TOC]
 
 ## Shipping a change
 
@@ -117,6 +113,31 @@ $incidentV2 = $incidentV1.<<<'MD'
 MD;
 
 return [
+    ['33 days', 'Maya', 'Sidebar', <<<'MD'
+## Start here
+
+- [[Home]]
+- [[Onboarding]]
+- [[How we work]]
+
+## Shipping
+
+- [[Deploy guide]]
+- [[Feature flags]]
+- [[Service map]]
+
+## When things break
+
+- [[On-call rota]]
+- [[Incident reviews]]
+- [[Incident 14 September]]
+
+## Reference
+
+- [[Glossary]]
+- [[Café crème]]
+MD, 'Created page'],
+
     ['32 days', 'Maya', 'Home', <<<'MD'
 Welcome to the Halyard handbook: how we build, ship and support Halyard.
 
@@ -225,8 +246,6 @@ MD, 'Created page'],
 
     ['2 hours', 'Maya', 'Home', <<<'MD'
 Welcome to the Halyard handbook: how we build, ship and support Halyard. Everyone can edit; if something is wrong or missing, fix it.
-
-[TOC]
 
 ## Start here
 

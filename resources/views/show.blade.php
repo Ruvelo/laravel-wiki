@@ -2,6 +2,17 @@
 
 @section('title', $page->title)
 
+@if (count($outline) > 1)
+    @section('outline')
+        <h2>On this page</h2>
+        <ul>
+            @foreach ($outline as $heading)
+                <li @class(['is-sub' => $heading['level'] === 3])><a href="#{{ $heading['id'] }}">{{ $heading['text'] }}</a></li>
+            @endforeach
+        </ul>
+    @endsection
+@endif
+
 @section('content')
     <article>
         <div class="wiki-head">

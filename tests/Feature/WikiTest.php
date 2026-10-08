@@ -6,6 +6,7 @@ namespace Ruvelo\Wiki\Tests\Feature;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Testing\TestResponse;
 use Ruvelo\Wiki\Events\PageSaved;
 use Ruvelo\Wiki\Models\Page;
 use Ruvelo\Wiki\Tests\TestCase;
@@ -18,6 +19,37 @@ class WikiTest extends TestCase
         $page->commit($title, $body, 'Created page');
 
         return $page;
+    }
+
+    public function test_the_menu_is_the_sidebar_page_with_the_current_page_marked(): void
+    {
+        $this->page('Ops');
+        $this->page('Deploy guide');
+
+        // No sidebar page yet: an alphabetical list.
+        $menu = $this->part($this->get('/wiki/ops'), 'wiki-menu-links');
+        $this->assertMatchesRegularExpression('/Deploy guide.*Ops/s', $menu);
+        $this->assertStringContainsString('href="'.route('wiki.show', 'ops').'" aria-current="page"', $menu);
+
+        $this->page('Sidebar', "## Shipping\n\n- [[Deploy guide]]\n- [[Rollbacks]]");
+
+        $menu = $this->part($this->get('/wiki/deploy-guide'), 'wiki-menu-links');
+        $this->assertStringContainsString('Shipping', $menu);
+        $this->assertStringContainsString('href="'.route('wiki.show', 'deploy-guide').'" aria-current="page"', $menu);
+        $this->assertStringContainsString('wiki-link--new', $menu);
+        $this->assertStringNotContainsString('>Ops<', $menu);
+
+        // The menu links everywhere, so it never shows up as a backlink.
+        $this->assertSame([], Page::where('slug', 'deploy-guide')->first()->backlinks()->pluck('title')->all());
+    }
+
+    public function test_pages_get_an_outline_of_their_headings(): void
+    {
+        $this->page('Ops', "Intro\n\n## Paging\n\n### At night\n\n## Escalation");
+
+        $outline = $this->part($this->get('/wiki/ops'), 'wiki-outline');
+
+        $this->assertMatchesRegularExpression('/href="#content-paging">Paging.*class="is-sub".*At night.*Escalation/s', $outline);
     }
 
     public function test_the_json_api_is_off_by_default(): void
@@ -92,7 +124,9 @@ class WikiTest extends TestCase
         $this->page('Deploy guide', 'Ask [[Ops]].');
         $this->page('Unrelated');
 
-        $this->get('/wiki/ops')->assertSee('What links here')->assertSee('Deploy guide')->assertDontSee('Unrelated');
+        $backlinks = $this->part($this->get('/wiki/ops'), 'wiki-backlinks');
+        $this->assertStringContainsString('Deploy guide', $backlinks);
+        $this->assertStringNotContainsString('Unrelated', $backlinks);
         $this->assertSame(['Deploy guide'], $ops->backlinks()->pluck('title')->all());
     }
 
@@ -211,10 +245,10 @@ class WikiTest extends TestCase
         $this->page('Cron jobs', 'Every minute.');
         $this->page('Unrelated', 'Nothing.');
 
-        $this->get('/wiki/_/search?q=cron')
-            ->assertOk()
-            ->assertSeeInOrder(['Cron jobs', 'Deploy guide'])
-            ->assertDontSee('Unrelated');
+        $results = $this->part($this->get('/wiki/_/search?q=cron')->assertOk(), 'wiki-list');
+
+        $this->assertMatchesRegularExpression('/Cron jobs.*Deploy guide/s', $results);
+        $this->assertStringNotContainsString('Unrelated', $results);
     }
 
     public function test_search_jumps_to_an_exact_title(): void
@@ -230,7 +264,10 @@ class WikiTest extends TestCase
         $this->page('Discounts', 'Save 50% today.');
         $this->page('Other', 'Save 50 dollars.');
 
-        $this->get('/wiki/_/search?q=50%25')->assertSee('Discounts')->assertDontSee('Other');
+        $results = $this->part($this->get('/wiki/_/search?q=50%25'), 'wiki-list');
+
+        $this->assertStringContainsString('Discounts', $results);
+        $this->assertStringNotContainsString('Other', $results);
     }
 
     public function test_index_and_recent_changes_list_pages(): void
@@ -240,6 +277,17 @@ class WikiTest extends TestCase
 
         $this->get('/wiki/_/pages')->assertOk()->assertSeeInOrder(['Alpha', 'Beta']);
         $this->get('/wiki/_/recent')->assertOk()->assertSeeInOrder(['Alpha', 'Beta']);
+    }
+
+    /**
+     * The HTML of the first element with this class, so assertions about
+     * the page body aren't fooled by the menu listing every page.
+     */
+    private function part(TestResponse $response, string $class): string
+    {
+        $this->assertSame(1, preg_match('/<(\w+) class="'.preg_quote($class, '/').'"[^>]*>(.*?)<\/\1>/s', (string) $response->getContent(), $match), "No .{$class} in the page.");
+
+        return $match[2];
     }
 
     private function linkTargets(Page $page): array

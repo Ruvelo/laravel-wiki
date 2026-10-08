@@ -18,6 +18,7 @@ use Ruvelo\Wiki\Exceptions\EditConflict;
 use Ruvelo\Wiki\Exceptions\InvalidTitle;
 use Ruvelo\Wiki\Exceptions\PageAlreadyExists;
 use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Support\Navigation;
 use Ruvelo\Wiki\Support\WikiLinks;
 
 /**
@@ -124,12 +125,12 @@ class Page extends Model
      */
     public function backlinks(): Builder
     {
-        return static::query()->whereIn(
-            'id',
-            $this->getConnection()->table(static::linksTable())
+        return static::query()
+            ->whereIn('id', $this->getConnection()->table(static::linksTable())
                 ->where('target_slug', $this->slug)
-                ->select('page_id'),
-        );
+                ->select('page_id'))
+            // The menu links to everything; listing it would be noise.
+            ->when(Navigation::sidebarSlug(), fn (Builder $query, string $slug) => $query->where('slug', '!=', $slug));
     }
 
     /**

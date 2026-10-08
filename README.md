@@ -3,9 +3,10 @@
 </p>
 
 <p align="center">
-  <a href="https://ruvelo.github.io/laravel-wiki/demo/"><strong>Live demo</strong></a> &nbsp;&nbsp;&nbsp;
-  <a href="https://ruvelo.github.io/laravel-wiki/docs.html"><strong>Docs</strong></a> &nbsp;&nbsp;&nbsp;
-  <a href="https://ruvelo.github.io/laravel-wiki/"><strong>Website</strong></a>
+  <a href="https://ruvelo.github.io/laravel-wiki/"><strong>Live demo</strong></a> &nbsp;&nbsp;&nbsp;
+  <a href="#configuration"><strong>Configuration</strong></a> &nbsp;&nbsp;&nbsp;
+  <a href="#for-developers"><strong>Developer guide</strong></a> &nbsp;&nbsp;&nbsp;
+  <a href="CHANGELOG.md"><strong>Changelog</strong></a>
 </p>
 
 <p align="center">
@@ -25,7 +26,7 @@ composer require ruvelo/laravel-wiki
 php artisan migrate
 ```
 
-Then open `/wiki`. Or click around the [live demo](https://ruvelo.github.io/laravel-wiki/demo/) first.
+Then open `/wiki`. Or click around the [live demo](https://ruvelo.github.io/laravel-wiki/) first.
 
 ## A quick tour
 
@@ -56,6 +57,7 @@ Then open `/wiki`. Or click around the [live demo](https://ruvelo.github.io/lara
 
 - **Markdown, GitHub-style**: headings, tables, task lists, fenced code, autolinks and strikethrough. Put `[TOC]` on its own line to get a table of contents.
 - **Wiki links**: `[[Deploy guide]]` or `[[Deploy guide|how we ship]]`. A link to a page that doesn't exist yet shows in red; for editors it opens the create form with the title filled in.
+- **Docs-style layout**: a menu on the left, the page in the middle and its outline on the right, like the Laravel docs. The menu is a page called *Sidebar* that editors maintain: headings become groups, `[[links]]` become items. Without it, the menu lists every page.
 - **What links here**: every page lists the pages that link to it.
 - **Every save is a revision**: browse a page's history, see a line-by-line diff of each change, and restore any old version. A restore is itself a revision, so it can be undone.
 - **No lost edits**: if someone saves a page while you're editing it, your save is refused rather than overwriting theirs, and your text stays in the editor.
@@ -104,6 +106,7 @@ php artisan vendor:publish --tag=wiki-config
 | `middleware` | `['web']` | Applied to every route |
 | `edit_middleware` | `['auth']` | Added for create/edit/delete/restore |
 | `home` | `home` | Slug shown at the wiki root |
+| `sidebar` | `sidebar` | Slug of the page used as the left menu; `null` for an automatic list |
 | `table_prefix` | `wiki_` | Tables are `{prefix}pages`, `{prefix}revisions`, `{prefix}links` |
 | `run_migrations` | `true` | Set to `false` if you publish and manage the migration yourself |
 | `user_model` | your `users` provider model | Who revisions are attributed to |
@@ -147,7 +150,20 @@ Events: `PageSaved` (with `wasCreated()`) and `PageDeleted`. Exceptions: `EditCo
 
 ### JSON API
 
-Off by default. Set `WIKI_API=true` and you get `/api/wiki/pages` (list, search, show, create, update, delete) and `/api/wiki/pages/{slug}/revisions` (list, show, restore), protected by Sanctum. Updates take a `base_revision` and answer `409` rather than overwrite a newer save. [Full reference](https://ruvelo.github.io/laravel-wiki/docs.html#api).
+Off by default. Set `WIKI_API=true` and you get `/api/wiki/pages` (list, search, show, create, update, delete) and `/api/wiki/pages/{slug}/revisions` (list, show, restore), protected by Sanctum. Updates take a `base_revision` and answer `409` rather than overwrite a newer save. 
+
+| Request | Does |
+|---|---|
+| `GET /pages?q=` | List pages, or search them. Paginated, `per_page` up to 100 |
+| `GET /pages/{slug}` | One page with `body`, `html`, `revision`, `links` and `backlinks` |
+| `POST /pages` | Create. `201`, or `409` if the title is taken |
+| `PATCH /pages/{slug}` | Update `title` and/or `body`; send `base_revision` to get a `409` instead of overwriting a newer save |
+| `DELETE /pages/{slug}` | Delete the page and its history. `204` |
+| `GET /pages/{slug}/revisions` | History, newest first |
+| `GET /pages/{slug}/revisions/{id}` | One revision with its `body` |
+| `POST /pages/{slug}/revisions/{id}/restore` | Put that version back |
+
+Reading needs a valid token; writing also needs the `wiki-edit` gate. Use your own guard by setting `wiki.api.middleware`.
 
 ### Import and export
 

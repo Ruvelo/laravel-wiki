@@ -10,7 +10,7 @@
     ],
     "license": "MIT",
     "type": "library",
-    "homepage": "https://github.com/ruvelo/laravel-wiki",
+    "homepage": "https://ruvelo.github.io/laravel-wiki/",
     "authors": [
         {
             "name": "François Bultez",
@@ -57,7 +57,7 @@
             "@analyse",
             "@test"
         ],
-        "demo": "php demo/build.php build/site && cp -r site/. build/site/ && cp -r art build/site/art && echo 'Serve it: php -S 127.0.0.1:8000 -t build'"
+        "demo": "php demo/build.php build/site && cp -r art build/site/art && echo 'Serve it: php -S 127.0.0.1:8000 -t build, then open /site/'"
     },
     "config": {
         "sort-packages": true

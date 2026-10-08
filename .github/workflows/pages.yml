@@ -1,6 +1,6 @@
 name: pages
 
-# Builds the website and the live demo, and publishes them to GitHub Pages.
+# Builds the live demo and publishes it to GitHub Pages.
 # The demo is rendered by the package itself, so it always matches main.
 # The weekly run keeps the demo's "edited 2 hours ago" dates fresh.
 
@@ -38,10 +38,8 @@ jobs:
       - name: Build the demo
         run: php demo/build.php build/site
 
-      - name: Add the website and images
-        run: |
-          cp -r site/. build/site/
-          cp -r art build/site/art
+      - name: Add the images
+        run: cp -r art build/site/art
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -59,22 +59,62 @@
         a:hover { text-decoration: underline; text-underline-offset: 3px; }
         :focus-visible { outline: 2px solid var(--wiki-accent); outline-offset: 2px; border-radius: 4px; }
 
-        .wiki-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; padding: .75rem max(16px, calc((100% - 52rem) / 2 + 16px)); background: color-mix(in srgb, var(--wiki-bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--wiki-line); }
+        .wiki-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; padding: .75rem max(16px, calc((100% - 90rem) / 2 + 24px)); background: color-mix(in srgb, var(--wiki-bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--wiki-line); }
         .wiki-brand { display: inline-flex; align-items: center; gap: .6rem; font-weight: 600; font-size: .95rem; color: var(--wiki-ink); letter-spacing: -.01em; }
         .wiki-mark { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: linear-gradient(135deg, var(--wiki-accent), var(--wiki-accent-2)); color: #fff; font-size: .85rem; font-weight: 700; box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--wiki-accent) 60%, transparent); }
         .wiki-brand:hover { text-decoration: none; }
-        .wiki-search { flex: 1 1 12rem; position: relative; }
+        .wiki-search { flex: 0 1 26rem; position: relative; margin-left: auto; }
         .wiki-search::before { content: ""; position: absolute; left: .75rem; top: 50%; width: .8rem; height: .8rem; translate: 0 -50%; background: var(--wiki-text-3); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M7 1.5a5.5 5.5 0 0 1 4.38 8.83l3.15 3.14-1.06 1.06-3.14-3.15A5.5 5.5 0 1 1 7 1.5Zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M7 1.5a5.5 5.5 0 0 1 4.38 8.83l3.15 3.14-1.06 1.06-3.14-3.15A5.5 5.5 0 1 1 7 1.5Zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z'/%3E%3C/svg%3E") center / contain no-repeat; }
         .wiki-search input[type=search] { padding-left: 2.1rem; background: var(--wiki-muted); border-color: transparent; }
         .wiki-bar nav { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; align-items: center; font-size: .9rem; }
         .wiki-bar nav a:not(.wiki-btn) { color: var(--wiki-text-2); }
         .wiki-bar nav a:not(.wiki-btn):hover { color: var(--wiki-ink); text-decoration: none; }
 
-        .wiki-main { max-width: 52rem; margin: 0 auto; padding: 2.5rem 16px 4rem; }
-        .wiki-main--wide { max-width: 84rem; }
-        body:has(.wiki-main--wide) .wiki-bar { padding-inline: max(16px, calc((100% - 84rem) / 2 + 16px)); }
-        .wiki-foot { max-width: 52rem; margin: 0 auto; padding: 0 16px 2.5rem; color: var(--wiki-text-3); font-size: .8rem; }
+        /* Three columns, like the Laravel docs: menu, page, outline. */
+        .wiki-shell { max-width: 90rem; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 16rem minmax(0, 1fr) 13rem; gap: 3.5rem; }
+        .wiki-shell:not(:has(.wiki-outline)) { grid-template-columns: 16rem minmax(0, 1fr); }
+        .wiki-shell--wide, .wiki-shell--wide:not(:has(.wiki-outline)) { grid-template-columns: minmax(0, 1fr); }
+        .wiki-main { min-width: 0; max-width: 48rem; padding: 2.5rem 0 3rem; }
+        .wiki-shell--wide .wiki-main { max-width: none; }
+        .wiki-foot { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--wiki-line); color: var(--wiki-text-3); font-size: .8rem; }
         .wiki-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+        .wiki-sidebar, .wiki-outline { position: sticky; top: 4.25rem; align-self: start; max-height: calc(100vh - 4.25rem); overflow-y: auto; padding: 2.25rem 0 2rem; scrollbar-width: thin; }
+        .wiki-menu summary { display: none; }
+        .wiki-menu-links { font-size: .9rem; }
+        .wiki-menu-links h1, .wiki-menu-links h2, .wiki-menu-links h3 { font-size: .8rem; font-weight: 600; letter-spacing: 0; color: var(--wiki-ink); margin: 1.6rem 0 .5rem; }
+        .wiki-menu-links > :first-child { margin-top: 0; }
+        .wiki-menu-links .heading-permalink { display: none; }
+        .wiki-menu-links p { margin: .5rem 0; color: var(--wiki-text-3); font-size: .85rem; }
+        .wiki-menu-links ul { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--wiki-line); }
+        .wiki-menu-links ul ul { margin-left: .75rem; }
+        .wiki-menu-links li a { display: block; margin-left: -1px; padding: .3rem .85rem; border-left: 2px solid transparent; color: var(--wiki-text-2); line-height: 1.4; }
+        .wiki-menu-links li a:hover { color: var(--wiki-ink); border-left-color: var(--wiki-text-3); text-decoration: none; }
+        .wiki-menu-links li a[aria-current] { color: var(--wiki-accent-ink); border-left-color: var(--wiki-accent); background: linear-gradient(90deg, var(--wiki-accent-soft), transparent); font-weight: 500; }
+        .wiki-menu-links a.wiki-link--new { color: var(--wiki-new); }
+        .wiki-menu-edit { display: inline-block; margin-top: 1.5rem; font-size: .8rem; color: var(--wiki-text-3); }
+
+        .wiki-outline h2 { font-size: .8rem; font-weight: 600; letter-spacing: 0; margin: 0 0 .75rem; }
+        .wiki-outline ul { list-style: none; margin: 0; padding: 0; font-size: .85rem; }
+        .wiki-outline li { margin: .4rem 0; }
+        .wiki-outline li.is-sub { padding-left: .85rem; }
+        .wiki-outline a { color: var(--wiki-text-3); }
+        .wiki-outline a:hover { color: var(--wiki-accent); text-decoration: none; }
+
+        @media (max-width: 80rem) {
+            .wiki-outline { display: none; }
+            .wiki-shell, .wiki-shell:not(:has(.wiki-outline)) { grid-template-columns: 15rem minmax(0, 1fr); gap: 2.5rem; }
+        }
+        @media (max-width: 63.99rem) {
+            .wiki-shell, .wiki-shell:not(:has(.wiki-outline)) { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 16px; }
+            .wiki-sidebar { position: static; max-height: none; padding: 1rem 0 0; }
+            .wiki-menu { border: 1px solid var(--wiki-line); border-radius: var(--wiki-radius-lg); padding: .25rem 1rem; }
+            .wiki-menu[open] { padding-bottom: 1rem; }
+            .wiki-menu summary { display: list-item; cursor: pointer; font-weight: 500; font-size: .9rem; padding: .5rem 0; }
+            .wiki-main { padding-top: 1.5rem; }
+            .wiki-bar { padding-inline: 16px; }
+            .wiki-search { flex-basis: 100%; order: 3; margin-left: 0; }
+        }
 
         h1, h2, h3, h4 { line-height: 1.25; font-weight: 600; letter-spacing: -.02em; }
         h1 { font-size: 2rem; margin: 0; overflow-wrap: anywhere; }
@@ -178,14 +218,41 @@
         </nav>
     </header>
 
-    <main class="wiki-main @hasSection('wide') wiki-main--wide @endif">
-        @if (session('wiki.status'))
-            <p class="wiki-flash" role="status">{{ session('wiki.status') }}</p>
+    <div class="wiki-shell @hasSection('wide') wiki-shell--wide @endif">
+        @unless (View::hasSection('wide'))
+            <aside class="wiki-sidebar">
+                <details class="wiki-menu" open>
+                    <summary>Menu</summary>
+                    <nav class="wiki-menu-links" aria-label="Wiki">
+                        {!! $sidebar() !!}
+                    </nav>
+                    @if ($canEdit && \Ruvelo\Wiki\Support\Navigation::sidebarSlug())
+                        <a class="wiki-menu-edit" href="{{ route('wiki.show', \Ruvelo\Wiki\Support\Navigation::sidebarSlug()) }}">Edit this menu</a>
+                    @endif
+                </details>
+            </aside>
+        @endunless
+
+        <main class="wiki-main">
+            @if (session('wiki.status'))
+                <p class="wiki-flash" role="status">{{ session('wiki.status') }}</p>
+            @endif
+
+            @yield('content')
+
+            <footer class="wiki-foot">Powered by <a href="https://github.com/Ruvelo/laravel-wiki">Laravel Wiki</a> by Ruvelo</footer>
+        </main>
+
+        @hasSection('outline')
+            <aside class="wiki-outline" aria-label="On this page">
+                @yield('outline')
+            </aside>
         @endif
+    </div>
 
-        @yield('content')
-    </main>
-
-    <footer class="wiki-foot">Powered by <a href="https://github.com/ruvelo/laravel-wiki">Laravel Wiki</a> by Ruvelo</footer>
+    <script>
+        // On small screens the menu starts folded so the page comes first.
+        if (matchMedia('(max-width: 63.99rem)').matches) document.querySelector('.wiki-menu')?.removeAttribute('open');
+    </script>
 </body>
 </html>

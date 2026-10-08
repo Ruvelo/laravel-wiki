@@ -9,6 +9,8 @@ use Illuminate\Support\ServiceProvider;
 use Ruvelo\Wiki\Console\ExportCommand;
 use Ruvelo\Wiki\Console\ImportCommand;
 use Ruvelo\Wiki\Markdown\Renderer;
+use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Support\Navigation;
 
 class WikiServiceProvider extends ServiceProvider
 {
@@ -23,8 +25,16 @@ class WikiServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wiki');
 
-        View::composer('wiki::*', function ($view) {
+        View::composer('wiki::*', function ($view): void {
             $view->with('canEdit', Wiki::canEdit());
+        });
+
+        // The menu renders only if the layout shows it (not in the editor).
+        View::composer('wiki::layout', function ($view): void {
+            $data = $view->getData();
+            $current = ($data['page'] ?? null) instanceof Page ? $data['page']->slug : ($data['slug'] ?? null);
+
+            $view->with('sidebar', fn (): string => Navigation::sidebar(is_string($current) ? $current : null));
         });
 
         if (config('wiki.routes', true)) {

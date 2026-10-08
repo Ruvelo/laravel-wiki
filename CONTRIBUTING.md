@@ -46,8 +46,7 @@ src/Markdown/                Rendering and [[wiki link]] parsing
 src/Http/Controllers/        Web UI, and Api/ for the JSON API
 src/Console/                 wiki:import and wiki:export
 resources/views/             Blade views; the styles live in layout.blade.php
-site/                        The website, deployed to GitHub Pages
-demo/                        The demo wiki's content, build script and screenshots
+demo/                        The demo wiki (deployed to GitHub Pages), its build script and screenshots
 ```
 
 ## Style

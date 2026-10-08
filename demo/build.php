@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * Builds the read-only demo published at https://ruvelo.github.io/laravel-wiki/demo/.
+ * Builds the read-only demo published at https://ruvelo.github.io/laravel-wiki/.
  *
  * Seeds a wiki in an in-memory database, renders every page through the
  * package's real routes and views, and writes the HTML out as static files.
@@ -30,7 +30,7 @@ use Ruvelo\Wiki\WikiServiceProvider;
 require __DIR__.'/../vendor/autoload.php';
 
 const HOST = 'https://ruvelo.github.io';
-const PATH = 'laravel-wiki/demo';
+const PATH = 'laravel-wiki';
 const REPO = 'https://github.com/Ruvelo/laravel-wiki';
 
 $site = rtrim($argv[1] ?? __DIR__.'/../build/site', '/');
@@ -116,7 +116,7 @@ $fetch = function (string $path, ?User $as = null) use ($app, $http): string {
 $banner = '<div style="background:var(--wiki-accent);color:var(--wiki-on-accent);font:500 .875rem/1.4 var(--wiki-sans);padding:.55rem 16px;text-align:center">'
     .'You’re looking at a read-only demo of <a href="'.REPO.'" style="color:inherit;font-weight:700">ruvelo/laravel-wiki</a>. '
     .'Install it to create, edit and restore pages. '
-    .'<a href="/laravel-wiki/" style="color:inherit">Read the docs</a></div>';
+    .'<a href="'.REPO.'#readme" style="color:inherit">Read the docs</a></div>';
 
 $write = function (string $root, string $path, string $html, bool $withBanner = true) use ($banner): void {
     if ($withBanner) {
@@ -127,7 +127,7 @@ $write = function (string $root, string $path, string $html, bool $withBanner = 
     file_put_contents($file, $html);
 };
 
-$demo = $site.'/demo';
+$demo = $site;
 $paths = ['', '_/pages', '_/recent'];
 
 foreach (Page::query()->orderBy('title')->get() as $page) {
@@ -163,6 +163,9 @@ $search = $fetch('_/search');
 $search = str_replace('</body>', '<script>window.WIKI_INDEX='.json_encode($index, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG).';</script>'
     .'<script>'.file_get_contents(__DIR__.'/search.js').'</script></body>', $search);
 $write($demo, '_/search', $search);
+
+// The demo used to live under /demo/; keep old links working.
+$write($site, 'demo', '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=/'.PATH.'/"><link rel="canonical" href="/'.PATH.'/"><title>Laravel Wiki demo</title><a href="/'.PATH.'/">Laravel Wiki demo</a>', false);
 
 if ($shots !== null) {
     $deploy = Page::query()->where('slug', 'deploy-guide')->first();

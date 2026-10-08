@@ -12,11 +12,10 @@ CHROME=${CHROME:-$(command -v chromium || command -v chromium-browser || command
 
 rm -rf build
 php demo/build.php build/site build/shots
-cp -r site/. build/site/
 mkdir -p art build/serve
 ln -sfn ../site build/serve/laravel-wiki
 ln -sfn ../shots build/serve/shots
-cp demo/banner.html build/serve/banner.html
+cp demo/banner.html demo/ruvelo-mark.svg build/serve/
 
 port=8899
 python3 -m http.server "$port" --bind 127.0.0.1 --directory build/serve >/dev/null 2>&1 &
@@ -31,13 +30,13 @@ shot() { # name, path, width,height, [extra chrome flags]
     echo "art/$1.png"
 }
 
-shot screenshot-page   shots/page/   1280,800
+shot screenshot-page   shots/page/   1440,900
 shot screenshot-editor shots/editor/ 1440,900
 shot screenshot-diff   shots/diff/   1280,800
 shot screenshot-search shots/search/ 1280,800
-shot screenshot-dark   shots/dark/   1280,800 --blink-settings=preferredColorScheme=0
+shot screenshot-dark   shots/dark/   1440,900 --blink-settings=preferredColorScheme=0
 shot screenshot-mobile shots/page/   390,844
 
-# The banner frames the editor screenshot, so it goes last.
-mkdir -p build/site/art && cp art/screenshot-editor.png build/site/art/
+# The banner frames the page screenshot, so it goes last.
+mkdir -p build/site/art && cp art/screenshot-page.png build/site/art/
 shot banner banner.html 1280,640

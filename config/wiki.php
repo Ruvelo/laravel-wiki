@@ -84,6 +84,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Menu
+    |--------------------------------------------------------------------------
+    |
+    | The left-hand menu is the page with this slug: headings become groups
+    | and [[links]] become items. Without that page, the menu lists pages
+    | alphabetically. Set to null to always use the automatic list.
+    |
+    */
+
+    'sidebar' => 'sidebar',
+
+    /*
+    |--------------------------------------------------------------------------
     | Storage
     |--------------------------------------------------------------------------
     |

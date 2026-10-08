@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Docs-style layout: a left-hand menu, the page, and an "On this page" outline on the right. The menu is an editable page (`wiki.sidebar`, "Sidebar" by default), with an alphabetical list as the fallback.
+
+### Changed
+
+- The demo is now the project's homepage; the separate website is gone, and the README is the documentation.
+
 ## [1.0.0] - 2026-10-08
 
 First release.
