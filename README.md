@@ -10,9 +10,10 @@
 
 <p align="center">
   <a href="https://github.com/Ruvelo/laravel-wiki/actions/workflows/tests.yml"><img src="https://github.com/Ruvelo/laravel-wiki/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
-  <img src="https://img.shields.io/badge/Laravel-12%20%7C%2013-2251d1" alt="Laravel 12 | 13">
-  <img src="https://img.shields.io/badge/PHP-8.3%2B-2251d1" alt="PHP 8.3+">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2251d1" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/Laravel-12%20%7C%2013-3d4eff" alt="Laravel 12 | 13">
+  <img src="https://img.shields.io/badge/PHP-8.3%2B-3d4eff" alt="PHP 8.3+">
+  <img src="https://img.shields.io/badge/PHPStan-level%208-3d4eff" alt="PHPStan level 8">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3d4eff" alt="MIT license"></a>
 </p>
 
 # Laravel Wiki
@@ -109,6 +110,11 @@ php artisan vendor:publish --tag=wiki-config
 | `user_name_attribute` | `name` | Shown as the author in the history |
 | `per_page` | `50` | Page size for lists and search |
 | `routes` | `true` | Set to `false` to register routes yourself (copy `routes/web.php`) |
+| `api.enabled` | `false` (`WIKI_API`) | Turn on the JSON API |
+| `api.prefix` | `api/wiki` | Where the JSON API lives |
+| `api.middleware` | `['api', 'auth:sanctum']` | Applied to every API route |
+| `markdown.extensions` | `[]` | Extra CommonMark extensions |
+| `markdown.options` | `[]` | CommonMark options, merged over the defaults |
 
 ## Making it look like your app
 
@@ -120,21 +126,50 @@ php artisan vendor:publish --tag=wiki-views
 
 They land in `resources/views/vendor/wiki`. Every page extends `layout.blade.php`, so swapping that one file for your own layout is enough to put the wiki inside your app's chrome. Each page fills a `content` section and a `title` section. The layout also has a `wiki-head` stack for extra `<head>` tags, and colors are CSS variables (`--wiki-accent` and friends) at the top of the layout.
 
-## Using it from code
+## For developers
+
+### PHP API
 
 ```php
-use Ruvelo\Wiki\Models\Page;
+use Ruvelo\Wiki\Wiki;
 
-// Create or update a page; the commit is recorded as a revision.
-$page = Page::firstOrNew(['slug' => Page::slugFor('Release notes')]);
-$page->commit('Release notes', "## 2.0\n\nSee [[Upgrade guide]].", 'Automated import', $user);
+$page = Wiki::write('Release notes', $markdown, 'v2.0 notes', $user); // create or update
+Wiki::create('Onboarding');                 // throws PageAlreadyExists if taken
+Wiki::find('Release notes')?->html();       // by title or slug
+Wiki::search('deploy')->limit(5)->get();
+Wiki::render('**Markdown** with [[links]]');
 
-$page->html();               // rendered HTML
-$page->revisions;            // newest first
-$page->backlinks()->get();   // pages linking here
+// Refuse the save if someone else saved since revision 41
+$page->commit($title, $body, 'Fix typo', $user, basedOn: 41);
 ```
 
-The `Ruvelo\Wiki\Events\PageSaved` event fires after every create, edit and restore, carrying `$page` and `$revision`. Hook it up for notifications, search indexing or cache busting.
+Events: `PageSaved` (with `wasCreated()`) and `PageDeleted`. Exceptions: `EditConflict`, `PageAlreadyExists` and `InvalidTitle`, all extending `WikiException`.
+
+### JSON API
+
+Off by default. Set `WIKI_API=true` and you get `/api/wiki/pages` (list, search, show, create, update, delete) and `/api/wiki/pages/{slug}/revisions` (list, show, restore), protected by Sanctum. Updates take a `base_revision` and answer `409` rather than overwrite a newer save. [Full reference](https://ruvelo.github.io/laravel-wiki/docs.html#api).
+
+### Import and export
+
+```bash
+php artisan wiki:import ~/obsidian-vault --user=1   # also docs/ folders and GitHub wikis
+php artisan wiki:export storage/wiki                 # one .md per page, with front matter
+```
+
+Re-importing only saves files that changed. `[[links]]`, `[[Page|label]]` and `[[Page#Section]]` work as in Obsidian.
+
+### Extending Markdown
+
+```php
+// config/wiki.php: 'markdown' => ['extensions' => [FootnoteExtension::class]]
+Wiki::extendMarkdown(fn (Environment $env) => $env->addExtension(new MentionExtension));
+```
+
+### In your tests
+
+```php
+Page::factory()->linkingTo('Deploy guide')->create(); // with a revision and indexed links
+```
 
 ## URLs
 
@@ -154,18 +189,15 @@ Special pages live under `/_/`, which can never collide with a page: slugs never
 
 Renaming a page keeps its address. Links written with the old title (`[[Old title]]`) still resolve, because they point at the slug.
 
-## Testing
+## Contributing
 
-```
-composer install
-composer test
-```
+Pull requests are welcome. Clone, `composer install`, then `composer check` runs code style (Pint), static analysis (PHPStan level 8) and the tests, exactly as CI does. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [changelog](CHANGELOG.md).
 
-The demo and the screenshots are built from the package itself: `php demo/build.php build/site` writes the static demo, and `demo/screenshots.sh` regenerates the images in `art/`. The website deploys from `site/` to GitHub Pages on every push to `main`.
+The demo and screenshots are built from the package itself: `composer demo` writes the static demo into `build/`, and `demo/screenshots.sh` regenerates `art/`.
 
 ## Credits
 
-Built by [François Bultez](https://github.com/francoisbultez) at [Ruvelo](https://github.com/ruvelo).
+Built by [François Bultez](https://github.com/francoisbultez) at [Ruvelo](https://github.com/Ruvelo), and everyone who [contributes](https://github.com/Ruvelo/laravel-wiki/graphs/contributors).
 
 ## License
 
