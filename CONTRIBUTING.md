@@ -32,7 +32,7 @@ composer check
 
 1. Branch from `main`.
 2. Write a test that fails without your change. Feature tests live in `tests/Feature`, unit tests in `tests/Unit`.
-3. Keep the public API stable: `Ruvelo\Wiki\Wiki`, the models, events, exceptions, config keys, routes and the JSON shapes. If you must change one, say so in the PR.
+3. Keep the public API stable: `Ruvelo\Wiki\Wiki`, the models, events, exceptions, config keys, routes, the JSON shapes and the MCP tool names and arguments. If you must change one, say so in the PR.
 4. Run `composer format` and `composer check`.
 5. Add a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
 6. Open the pull request. Screenshots help for anything visual.
@@ -45,7 +45,9 @@ src/Models/                  Page and Revision; Page::commit() is the one write 
 src/Markdown/                Rendering and [[wiki link]] parsing
 src/Http/Controllers/        Web UI, and Api/ for the JSON API
 src/Console/                 wiki:import and wiki:export
+src/Mcp/                     The MCP server for AI agents (optional: laravel/mcp is only suggested)
 resources/views/             Blade views; the styles live in layout.blade.php
+resources/boost/guidelines/  Laravel Boost guidelines for coding agents; keep them in step with the API
 demo/                        The demo wiki (deployed to GitHub Pages), its build script and screenshots
 ```
 

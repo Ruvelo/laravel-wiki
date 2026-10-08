@@ -67,6 +67,7 @@ Then open `/wiki`. Or click around the [live demo](https://ruvelo.github.io/lara
 - **Safe to render**: raw HTML in the source is escaped and `javascript:` links are dropped. People with edit rights can't inject scripts.
 - **Readable URLs in any language**: `Café Crème` → `/wiki/café-crème`, `日本語` → `/wiki/日本語`.
 - **Light and dark mode** following the system setting, readable at phone width.
+- **A knowledge source for AI agents**: an optional MCP server lets Claude, Cursor and other agents search and read the wiki, and edit it if you allow. Coding agents using [Laravel Boost](https://laravel.com/docs/boost) also learn how to use the package correctly.
 
 ## Requirements
 
@@ -116,6 +117,12 @@ php artisan vendor:publish --tag=wiki-config
 | `api.enabled` | `false` (`WIKI_API`) | Turn on the JSON API |
 | `api.prefix` | `api/wiki` | Where the JSON API lives |
 | `api.middleware` | `['api', 'auth:sanctum']` | Applied to every API route |
+| `mcp.enabled` | `false` (`WIKI_MCP`) | Turn on the MCP server for AI agents (needs `laravel/mcp`) |
+| `mcp.path` | `mcp/wiki` | The MCP HTTP endpoint; `null` for none |
+| `mcp.middleware` | `['auth:sanctum']` | Applied to the MCP endpoint. Use a token guard: agents can't hold a session |
+| `mcp.local` | `wiki` | Handle for `php artisan mcp:start wiki`; `null` for none |
+| `mcp.local_user` | `null` (`WIKI_MCP_USER`) | User id the local server acts as; a guest otherwise |
+| `mcp.allow_writes` | `false` (`WIKI_MCP_WRITES`) | Offer the `write_page` tool (still needs the `wiki-edit` gate) |
 | `markdown.extensions` | `[]` | Extra CommonMark extensions |
 | `markdown.options` | `[]` | CommonMark options, merged over the defaults |
 
@@ -128,6 +135,99 @@ php artisan vendor:publish --tag=wiki-views
 ```
 
 They land in `resources/views/vendor/wiki`. Every page extends `layout.blade.php`, so swapping that one file for your own layout is enough to put the wiki inside your app's chrome. Each page fills a `content` section and a `title` section. The layout also has a `wiki-head` stack for extra `<head>` tags, and colors are CSS variables (`--wiki-accent` and friends) at the top of the layout.
+
+## Use it from AI agents
+
+The wiki can be a knowledge source for AI agents: Claude Code, Claude Desktop, Cursor, ChatGPT or anything else that speaks the [Model Context Protocol](https://modelcontextprotocol.io). Ask "how do refunds work?" and the agent searches the wiki, reads the right pages and cites them.
+
+It's built on [Laravel MCP](https://laravel.com/docs/mcp), which the wiki suggests but doesn't require. To turn it on:
+
+```
+composer require laravel/mcp
+```
+
+```ini
+WIKI_MCP=true
+```
+
+Agents get these tools:
+
+| Tool | Does |
+|---|---|
+| `search_pages` | Search titles and text: titles, slugs, a snippet around the match, URLs |
+| `read_page` | One page by slug or title: Markdown body, title, URL, last update, current revision, the pages it links to and the pages linking to it |
+| `list_pages` | Every page alphabetically, paginated |
+| `recent_changes` | The latest edits with their summaries and authors, for the whole wiki or one page |
+| `write_page` | Create or update a page with an edit summary. Only when you allow writes (below) |
+
+Every page is also a resource, `wiki://pages/{slug}`, with slug completion, so clients that let you attach resources can pull a page into the conversation.
+
+**Who can see what.** The endpoint is `/mcp/wiki`, behind `auth:sanctum` by default (set `wiki.mcp.middleware` for another guard). The wiki has no per-page permissions, so anyone who gets through that middleware can read every page, just as anyone who can open `/wiki` can. If your web wiki is private, keep the MCP guard at least as strict.
+
+**Writing is off by default.** Set `WIKI_MCP_WRITES=true` to offer `write_page`. Agents then edit like people do: they need a signed-in user who passes the `wiki-edit` gate, each save is a revision with a summary (so it can be diffed and undone in the history), and an update must name the revision it was based on. If someone saved the page in the meantime, the write is refused and the agent is told to read it again and merge. An agent can't overwrite a page it hasn't read.
+
+### Connect a client
+
+Create a token for the user the agent acts as (with [Sanctum](https://laravel.com/docs/sanctum): `$user->createToken('wiki-mcp')->plainTextToken`), then:
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http wiki https://example.com/mcp/wiki --header "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Cursor** (`.cursor/mcp.json`)
+
+```json
+{
+  "mcpServers": {
+    "wiki": {
+      "url": "https://example.com/mcp/wiki",
+      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
+    }
+  }
+}
+```
+
+**Claude Desktop** (`claude_desktop_config.json`), through the [mcp-remote](https://www.npmjs.com/package/mcp-remote) bridge:
+
+```json
+{
+  "mcpServers": {
+    "wiki": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://example.com/mcp/wiki", "--header", "Authorization:${WIKI_AUTH}"],
+      "env": { "WIKI_AUTH": "Bearer YOUR_TOKEN" }
+    }
+  }
+}
+```
+
+**On your own machine**, skip the token: run the server over stdio from your app's folder. Set `WIKI_MCP_USER` to a user id if the agent should be able to write as that user.
+
+```bash
+claude mcp add wiki -- php /path/to/your-app/artisan mcp:start wiki
+```
+
+```json
+{
+  "mcpServers": {
+    "wiki": { "command": "php", "args": ["/path/to/your-app/artisan", "mcp:start", "wiki"] }
+  }
+}
+```
+
+Clients that only sign in with OAuth (ChatGPT, Claude.ai connectors) need Laravel Passport: follow the [Laravel MCP OAuth guide](https://laravel.com/docs/mcp#oauth), then set `wiki.mcp.middleware` to `['auth:api']`.
+
+To mount the server yourself instead (another path, extra middleware), leave `WIKI_MCP` off and register `Ruvelo\Wiki\Mcp\WikiServer` in `routes/ai.php`:
+
+```php
+Mcp::web('/mcp/handbook', \Ruvelo\Wiki\Mcp\WikiServer::class)->middleware(['auth:sanctum', 'throttle:60,1']);
+```
+
+### Laravel Boost
+
+If your app uses [Laravel Boost](https://laravel.com/docs/boost), `php artisan boost:install` (or `boost:update --discover`) picks up the wiki's guidelines, so your coding agent knows to write pages through `Wiki::write()` rather than the tables, to render with `$page->html()`, to use the factory in tests, and so on.
 
 ## For developers
 
@@ -145,6 +245,8 @@ Wiki::render('**Markdown** with [[links]]');
 // Refuse the save if someone else saved since revision 41
 $page->commit($title, $body, 'Fix typo', $user, basedOn: 41);
 ```
+
+`Wiki::write()` takes the same `basedOn:` and throws `EditConflict` rather than overwrite a newer save.
 
 Events: `PageSaved` (with `wasCreated()`) and `PageDeleted`. Exceptions: `EditConflict`, `PageAlreadyExists` and `InvalidTitle`, all extending `WikiException`.
 
