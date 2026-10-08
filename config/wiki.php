@@ -57,6 +57,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MCP server (AI agents)
+    |--------------------------------------------------------------------------
+    |
+    | Lets AI agents (Claude Code, Cursor, ChatGPT...) search and read the
+    | wiki over the Model Context Protocol. Needs `composer require
+    | laravel/mcp`; off by default.
+    |
+    | `path` is the HTTP endpoint, guarded by `middleware` (a token guard,
+    | since agents can't hold a session); null turns it off. `local` is the
+    | handle for `php artisan mcp:start {local}`, for agents on the same
+    | machine; null turns it off. A local server has no signed-in user, so
+    | set `local_user` (a user id) if it should write as someone.
+    |
+    | Writing is off unless `allow_writes` is true, and then still needs the
+    | `wiki-edit` gate, like the web UI.
+    |
+    */
+
+    'mcp' => [
+        'enabled' => (bool) env('WIKI_MCP', false),
+        'path' => 'mcp/wiki',
+        'middleware' => ['auth:sanctum'],
+        'local' => 'wiki',
+        'local_user' => env('WIKI_MCP_USER'),
+        'allow_writes' => (bool) env('WIKI_MCP_WRITES', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown
     |--------------------------------------------------------------------------
     |
