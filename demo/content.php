@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // The demo wiki: a fictional product team's handbook. Each entry is one save,
 // oldest first: [how long ago, author, title, Markdown, edit summary].
 

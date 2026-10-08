@@ -6,15 +6,15 @@
     <title>Docs · Laravel Wiki</title>
     <meta name="description" content="Install, configure and customise Laravel Wiki, the drop-in wiki for Laravel apps.">
     <meta property="og:image" content="https://ruvelo.github.io/laravel-wiki/art/banner.png">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251d1'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'%3E%5B%5B%5D%5D%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="assets/ruvelo-mark.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
     <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
     <header class="wrap top">
-        <a class="mark" href="./">Laravel Wiki</a>
+        <a class="mark" href="./"><img src="assets/ruvelo-mark.svg" alt="">Laravel Wiki <small>by Ruvelo</small></a>
         <nav aria-label="Main">
             <a href="demo/">Demo</a>
             <a href="docs.html" aria-current="page">Docs</a>
@@ -31,9 +31,14 @@
                 <li><a href="#history">History</a></li>
                 <li><a href="#config">Configuration</a></li>
                 <li><a href="#look">Changing the look</a></li>
-                <li><a href="#code">From your code</a></li>
+                <li><a href="#php">PHP API</a></li>
+                <li><a href="#api">JSON API</a></li>
+                <li><a href="#import">Import and export</a></li>
+                <li><a href="#markdown">Extending Markdown</a></li>
+                <li><a href="#testing">Testing your app</a></li>
                 <li><a href="#urls">URLs</a></li>
                 <li><a href="#faq">Questions</a></li>
+                <li><a href="#contributing">Contributing</a></li>
             </ol>
         </nav>
 
@@ -101,18 +106,82 @@ Ask [[On-call rota|whoever is on call]].</pre>
             <p>They land in <code>resources/views/vendor/wiki</code>. Every page extends <code>layout.blade.php</code>, so replacing that one file puts the wiki inside your app's own layout. Pages fill a <code>title</code> and a <code>content</code> section, and there's a <code>wiki-head</code> stack for extra tags in <code>&lt;head&gt;</code>.</p>
             <p>To keep the layout and only change colours, override the CSS variables at the top of it, such as <code>--wiki-accent</code> for links and buttons and <code>--wiki-new</code> for links to missing pages.</p>
 
-            <h2 id="code">From your code</h2>
-            <p>Pages are Eloquent models. Use <code>commit()</code> to save, so the change is recorded as a revision and links are re-indexed:</p>
-<pre class="code">use Ruvelo\Wiki\Models\Page;
+            <h2 id="php">PHP API</h2>
+            <p>Everything the UI does is available from your code through <code>Ruvelo\Wiki\Wiki</code>. Every save goes through the same path as the editor: it records a revision, re-indexes links and fires events.</p>
+<pre class="code" data-lang="php">use Ruvelo\Wiki\Wiki;
 
-$page = Page::firstOrNew(['slug' => Page::slugFor('Release notes')]);
-$page->commit('Release notes', "## 2.0\n\nSee the [[Upgrade guide]].", 'Imported from GitHub', $user);
+// Create or update (an identical save records nothing)
+$page = Wiki::write('Release notes', $markdown, 'v2.0 notes', $user);
 
-$page->html();               // the rendered page
-$page->revisions;            // newest first
-$page->backlinks()->get();   // pages that link here</pre>
+// Create only: throws PageAlreadyExists if the title is taken
+Wiki::create('Onboarding', '- [ ] Get a laptop');
+
+Wiki::find('Release notes');          // by title or slug, or null
+Wiki::search('deploy')->limit(5)->get();
+Wiki::render('**Markdown** with [[links]]');</pre>
+            <p>Pages are Eloquent models, so the usual tools work too:</p>
+<pre class="code" data-lang="php">$page->html();                 // rendered, safe HTML
+$page->plainText();            // for previews and search snippets
+$page->revisions;              // newest first
+$page->backlinks()->get();     // pages that link here
+$page->outgoingLinks();        // slugs this page links to
+
+// Save, refusing if someone else saved since revision 41
+$page->commit($title, $body, 'Fix typo', $user, basedOn: 41);</pre>
+            <h3>Exceptions</h3>
+            <p>All extend <code>Ruvelo\Wiki\Exceptions\WikiException</code>: <code>EditConflict</code> (with <code>expectedRevision</code> and <code>currentRevision</code>), <code>PageAlreadyExists</code> (with the existing <code>page</code>) and <code>InvalidTitle</code>.</p>
             <h3>Events</h3>
-            <p><code>Ruvelo\Wiki\Events\PageSaved</code> fires after every create, edit and restore, with the <code>$page</code> and the new <code>$revision</code>. Listen for it to post to Slack, update a search index or clear a cache.</p>
+            <p><code>PageSaved</code> fires after every create, edit and restore, with <code>$page</code> and <code>$revision</code>; <code>$event->wasCreated()</code> tells a new page from an edit. <code>PageDeleted</code> fires after a page and its history are removed.</p>
+<pre class="code" data-lang="php">Event::listen(PageSaved::class, function (PageSaved $event) {
+    Slack::post("{$event->page->title} was updated: {$event->revision->summary}");
+});</pre>
+
+            <h2 id="api">JSON API</h2>
+            <p>A REST API for pages and revisions, off by default. Turn it on with <code>WIKI_API=true</code>. It's served under <code>/api/wiki</code> and expects <a href="https://laravel.com/docs/sanctum">Sanctum</a> tokens; set <code>wiki.api.middleware</code> to use another guard. Reading needs a valid token; writing also needs the <code>wiki-edit</code> gate.</p>
+            <table>
+                <thead><tr><th>Request</th><th>Does</th></tr></thead>
+                <tbody>
+                    <tr><td><code>GET /pages?q=</code></td><td>List pages, or search them. Paginated, <code>per_page</code> up to 100.</td></tr>
+                    <tr><td><code>GET /pages/{slug}</code></td><td>One page with <code>body</code>, <code>html</code>, <code>revision</code>, <code>links</code> and <code>backlinks</code>.</td></tr>
+                    <tr><td><code>POST /pages</code></td><td>Create. <code>201</code>, or <code>409</code> if the title is taken.</td></tr>
+                    <tr><td><code>PATCH /pages/{slug}</code></td><td>Update <code>title</code> and/or <code>body</code>. Send <code>base_revision</code> to get a <code>409</code> instead of overwriting a newer save.</td></tr>
+                    <tr><td><code>DELETE /pages/{slug}</code></td><td>Delete the page and its history. <code>204</code>.</td></tr>
+                    <tr><td><code>GET /pages/{slug}/revisions</code></td><td>History, newest first.</td></tr>
+                    <tr><td><code>GET /pages/{slug}/revisions/{id}</code></td><td>One revision with its <code>body</code>.</td></tr>
+                    <tr><td><code>POST /pages/{slug}/revisions/{id}/restore</code></td><td>Put that version back.</td></tr>
+                </tbody>
+            </table>
+<pre class="code" data-lang="http">curl -X PATCH https://example.com/api/wiki/pages/deploy-guide \
+  -H "Authorization: Bearer $TOKEN" -H "Accept: application/json" \
+  -d body="Ship on Tuesdays." -d base_revision=41</pre>
+
+            <h2 id="import">Import and export</h2>
+            <p>Bring in a folder of Markdown files: an Obsidian vault, a <code>docs/</code> folder or a GitHub wiki checkout. <code>[[links]]</code>, including <code>[[Page#Section]]</code> and <code>[[Page|label]]</code>, work as-is.</p>
+<pre class="code" data-lang="shell">php artisan wiki:import ~/notes --user=1 --dry-run
+php artisan wiki:import ~/notes --user=1</pre>
+            <p>Each file's title comes from <code>title:</code> front matter, else a leading <code># Heading</code>, else the file name. Importing again only saves files that changed, so it's safe to run on a schedule. Hidden folders such as <code>.obsidian</code> and <code>.git</code> are skipped.</p>
+<pre class="code" data-lang="shell">php artisan wiki:export storage/wiki          # one {slug}.md per page
+php artisan wiki:export storage/wiki --force  # overwrite existing files</pre>
+            <p>Exported files carry their title in front matter, so <code>wiki:import</code> reads them back unchanged. Commit the folder to Git for a plain-text backup.</p>
+
+            <h2 id="markdown">Extending Markdown</h2>
+            <p>The renderer is <a href="https://commonmark.thephpleague.com/">league/commonmark</a> with GitHub-flavoured Markdown. Add any CommonMark extension through the config, or customise the environment in code:</p>
+<pre class="code" data-lang="php">// config/wiki.php
+'markdown' => [
+    'extensions' => [FootnoteExtension::class],
+    'options' => ['footnote' => ['backref_symbol' => '↩']],
+],
+
+// or in a service provider's boot()
+Wiki::extendMarkdown(fn (Environment $env) => $env->addExtension(new MentionExtension));</pre>
+            <p class="note">Raw HTML stays escaped unless you change <code>html_input</code>. Only do that if every editor is trusted.</p>
+
+            <h2 id="testing">Testing your app</h2>
+            <p>A factory makes real pages, with a first revision and indexed links, for your own tests:</p>
+<pre class="code" data-lang="php">use Ruvelo\Wiki\Models\Page;
+
+Page::factory()->titled('Deploy guide')->create();
+Page::factory()->linkingTo('Deploy guide', 'On-call rota')->create();</pre>
 
             <h2 id="urls">URLs</h2>
             <table>
@@ -138,6 +207,12 @@ $page->backlinks()->get();   // pages that link here</pre>
             <p>Search uses your database's <code>LIKE</code>, which is fine for thousands of pages. For more, listen for <code>PageSaved</code> and feed a search engine such as Meilisearch.</p>
             <h3>Is it free?</h3>
             <p>Yes. MIT licensed: use it in any project, commercial or not. Issues and pull requests are welcome on <a href="https://github.com/Ruvelo/laravel-wiki">GitHub</a>.</p>
+
+            <h2 id="contributing">Contributing</h2>
+            <p>Pull requests are welcome, from typo fixes to features. The <a href="https://github.com/Ruvelo/laravel-wiki/blob/main/CONTRIBUTING.md">contributing guide</a> has the setup; in short:</p>
+<pre class="code" data-lang="shell">git clone https://github.com/Ruvelo/laravel-wiki && cd laravel-wiki
+composer install
+composer check   # code style, static analysis and tests: what CI runs</pre>
         </main>
     </div>
 

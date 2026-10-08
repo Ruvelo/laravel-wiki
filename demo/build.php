@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Builds the read-only demo published at https://ruvelo.github.io/laravel-wiki/demo/.
  *

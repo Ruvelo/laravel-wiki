@@ -14,7 +14,12 @@
             </div>
         </div>
 
-        <p class="wiki-meta">Last edited <time datetime="{{ $page->updated_at->toIso8601String() }}">{{ $page->updated_at->diffForHumans() }}</time></p>
+        <p class="wiki-meta">
+            @if ($author)
+                <span class="wiki-avatar" aria-hidden="true">{{ collect(explode(' ', $author))->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}</span>
+            @endif
+            <span>Last edited <time datetime="{{ $page->updated_at->toIso8601String() }}">{{ $page->updated_at->diffForHumans() }}</time>@if ($author) by <strong>{{ $author }}</strong>@endif</span>
+        </p>
 
         <div class="wiki-prose">
             @if (trim($page->body) === '')

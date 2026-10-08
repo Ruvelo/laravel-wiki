@@ -10,15 +10,15 @@
     <meta property="og:image" content="https://ruvelo.github.io/laravel-wiki/art/banner.png">
     <meta property="og:url" content="https://ruvelo.github.io/laravel-wiki/">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251d1'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'%3E%5B%5B%5D%5D%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="assets/ruvelo-mark.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
     <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
     <header class="wrap top">
-        <a class="mark" href="./">Laravel Wiki</a>
+        <a class="mark" href="./"><img src="assets/ruvelo-mark.svg" alt="">Laravel Wiki <small>by Ruvelo</small></a>
         <nav aria-label="Main">
             <a href="demo/">Demo</a>
             <a href="docs.html">Docs</a>
@@ -28,6 +28,7 @@
 
     <main>
         <section class="wrap hero">
+            <a class="eyebrow" href="https://github.com/Ruvelo/laravel-wiki"><b>New</b> Free and open source, for Laravel 12 and 13</a>
             <h1>The wiki that lives inside your Laravel app.</h1>
             <p class="lede">Markdown pages, links between them, and the full history of every change. It runs on your database and your logins, with no build step and no extra services.</p>
 
@@ -103,6 +104,51 @@ and tell whoever is on the [[On-call rota]].
                 <div><dt>Scriptable</dt><dd>Create pages from code, read the history, and listen for a <code>PageSaved</code> event to notify, index or cache.</dd></div>
             </dl>
         </section>
+
+        <div class="band">
+        <section class="wrap section" id="developers">
+            <h2>Built for developers</h2>
+            <p class="intro">A typed PHP API, a REST API, Artisan commands and events. Strict types, PHPStan level 8, and tested on every Laravel and PHP version it supports.</p>
+            <div class="code-grid">
+                <figure>
+                    <figcaption>From your code</figcaption>
+<pre class="code" data-lang="php">use Ruvelo\Wiki\Wiki;
+
+Wiki::write('Release notes', $markdown, 'v2.0', $user);
+
+Wiki::find('Release notes')?->html();
+Wiki::search('deploy')->limit(5)->get();</pre>
+                </figure>
+                <figure>
+                    <figcaption>Over HTTP</figcaption>
+<pre class="code" data-lang="http">PATCH /api/wiki/pages/release-notes
+{
+  "body": "## 2.0.1\n\nSee [[Upgrade guide]].",
+  "base_revision": 41
+}
+
+→ 409 if someone saved since revision 41</pre>
+                </figure>
+                <figure>
+                    <figcaption>From the terminal</figcaption>
+<pre class="code" data-lang="shell"># An Obsidian vault, a docs/ folder, a GitHub wiki
+php artisan wiki:import ~/notes --user=1
+
+# Back to Markdown, front matter included
+php artisan wiki:export storage/wiki</pre>
+                </figure>
+                <figure>
+                    <figcaption>In your tests and listeners</figcaption>
+<pre class="code" data-lang="php">Page::factory()->linkingTo('Deploy guide')->create();
+
+Event::listen(PageSaved::class, fn ($e) =>
+    Slack::post("{$e->page->title} was updated")
+);</pre>
+                </figure>
+            </div>
+            <p class="more"><a href="docs.html#php">Read the developer docs</a> or <a href="https://github.com/Ruvelo/laravel-wiki/blob/main/CONTRIBUTING.md">send a pull request</a>.</p>
+        </section>
+        </div>
 
         <section class="wrap section" id="install">
             <h2>Running in under a minute</h2>

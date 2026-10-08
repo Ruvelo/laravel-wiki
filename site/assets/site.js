@@ -76,6 +76,28 @@
         });
     }
 
+    // A pocket syntax highlighter for the code samples: comments, strings,
+    // keywords, variables and calls. Escapes first, then wraps tokens.
+    const RULES = [
+        ['c', /(#[^\n]*|\/\/[^\n]*|→[^\n]*)/],
+        ['s', /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/],
+        ['v', /(\$[a-zA-Z_]\w*)/],
+        ['k', /\b(use|fn|new|return|PATCH|GET|POST|php|artisan)\b/],
+        ['f', /\b([A-Za-z_]\w*)(?=\()/],
+    ];
+    const pattern = new RegExp(RULES.map(([, re]) => re.source).join('|'), 'g');
+    for (const block of document.querySelectorAll('pre[data-lang]')) {
+        const text = block.textContent;
+        let html = '';
+        let last = 0;
+        for (const match of text.matchAll(pattern)) {
+            const group = match.slice(1).findIndex((part) => part !== undefined);
+            html += escape(text.slice(last, match.index)) + `<span class="tok-${RULES[group][0]}">${escape(match[0])}</span>`;
+            last = match.index + match[0].length;
+        }
+        block.innerHTML = html + escape(text.slice(last));
+    }
+
     // Docs: mark the section in view in the sidebar.
     const links = [...document.querySelectorAll('.docs nav a')];
     if (links.length && 'IntersectionObserver' in window) {
