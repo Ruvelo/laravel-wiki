@@ -1,0 +1,53 @@
+{
+    "name": "francoisbultez/lore",
+    "description": "A drop-in wiki for Laravel: Markdown pages, [[wiki links]], backlinks, full revision history with diffs, and search.",
+    "keywords": [
+        "laravel",
+        "wiki",
+        "markdown",
+        "knowledge-base",
+        "documentation"
+    ],
+    "license": "MIT",
+    "type": "library",
+    "homepage": "https://github.com/francoisbultez/lore",
+    "authors": [
+        {
+            "name": "Francois Bultez"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^12.0|^13.0",
+        "league/commonmark": "^2.6"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0|^11.0",
+        "phpunit/phpunit": "^11.5|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FrancoisBultez\\Lore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FrancoisBultez\\Lore\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FrancoisBultez\\Lore\\LoreServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
